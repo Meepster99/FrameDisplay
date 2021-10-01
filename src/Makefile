@@ -30,17 +30,22 @@ LINUX_OBJS = $(OBJS) simple_gui.o
 WINDOWS_OBJS = $(OBJS) windows_gui.o
 ALL_OBJS = $(OBJS) simple_gui.o windows_gui.o
 
-#CXX = g++
-#CFLAGS = -g -Wall -I/usr/include/GL -I/usr/include/SDL -I/home/mauve/dev/fdisp/src/include
-#LIBS = -lpng -lGL -lSDL
-#LDFLAGS = -g
-#PROJECT = framedisplay
-
-CXX = i586-mingw32msvc-g++
-CFLAGS = -s -Os -Wall -I/usr/i586-mingw32msvc/include/GL -I/usr/i586-mingw32msvc/include/SDL -I/home/mauve/dev/fdisp/src/include
-LIBS = /usr/i586-mingw32msvc/lib/libpng12.a -lz -lopengl32 -lcomctl32 -lole32
-LDFLAGS = -mwindows
 PROJECT = framedisplay.exe
+
+ifeq ($(OS),Windows_NT)
+	OPENGL_HEADERS = /usr/mingw/i686-w64-mingw32/include/GL
+else
+	OPENGL_HEADERS = /usr/i686-w64-mingw32/include/GL
+endif
+
+
+CXX = i686-w64-mingw32-g++ -m32
+
+CFLAGS = -s -O3 -Os -Wall -Wno-narrowing -I"$(CURDIR)" -I"$(CURDIR)/../libpng" -I"$(CURDIR)/../libz" -I"$(CURDIR)/../SDL" -I$(OPENGL_HEADERS)
+
+LIBS = -static -lmingw32 -lSDLmain -lSDL -lpng -lz -lopengl32 -lcomctl32 -lole32 -lwinmm -ldxguid
+
+LDFLAGS = -mwindows -L"$(CURDIR)/../libpng" -L"$(CURDIR)/../libz" -L"$(CURDIR)/../SDL"
 
 all: $(PROJECT)
 
