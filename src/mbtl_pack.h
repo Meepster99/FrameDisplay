@@ -1,9 +1,9 @@
-#ifndef MBAACC_PACK_H
-#define MBAACC_PACK_H
+#ifndef MBTL_PACK_H
+#define MBTL_PACK_H
 
 #include <cstdio>
 
-class MBAACC_Pack {
+class MBTL_Pack {
 private:
 	FILE		*m_file;
 
@@ -37,8 +37,8 @@ public:
 
 	bool		read_file(const char *filename, char **dest, unsigned int *size);
 
-			MBAACC_Pack();
-			~MBAACC_Pack();
+			MBTL_Pack();
+			~MBTL_Pack();
 };
 
 #endif

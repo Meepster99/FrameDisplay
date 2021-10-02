@@ -20,12 +20,15 @@
 
 #include <gl.h>
 
+#include <iostream>
+#include <fstream>
 #include "framedisplay.h"
 #include "clone.h"
 #include "render.h"
 
 #include "mbaa_framedisplay.h"
 #include "mbaacc_framedisplay.h"
+#include "mbtl_framedisplay.h"
 #include "touhou_framedisplay.h"
 #include "abk_framedisplay.h"
 #include "ougon_framedisplay.h"
@@ -35,6 +38,7 @@
 #define IDM_FILE_OPEN_OUGON		1003
 #define IDM_FILE_OPEN_MBAA		1004
 #define IDM_FILE_OPEN_MBAACC		1005
+#define IDM_FILE_OPEN_MBTL		1006
 #define IDM_FILE_CLOSE			1098
 #define IDM_FILE_EXIT			1099
 #define IDM_VIEW_ANIMATE		2010
@@ -86,7 +90,7 @@ static HGLRC hGLRC = 0;
 
 static const TCHAR *class_name = "FrameDisplay2";
 static const TCHAR *opengl_class_name = "FrameDisplay2OpenGL";
-static const TCHAR *program_name = "FrameDisplay v2.3";
+static const TCHAR *program_name = "FrameDisplay v2.4";
 
 static int toolbar_height = 0;
 
@@ -858,6 +862,18 @@ static void callback_mbaacc(const char *filename) {
 	set_framedisplay(fdisp);
 }
 
+static void callback_mbtl(const char *filename) {
+  FrameDisplay *fdisp2 = new MBTL_FrameDisplay();
+	FrameDisplay *fdisp = new MBAACC_FrameDisplay();
+	fdisp2->init(filename);
+	if (!fdisp->init(filename)) {
+		delete fdisp;
+		return;
+	}
+
+	set_framedisplay(fdisp);
+}
+
 static void callback_touhou(const char *filename) {
 	FrameDisplay *fdisp = new Touhou_FrameDisplay();
 	if (!fdisp->init(filename)) {
@@ -1172,6 +1188,9 @@ static void callback_command(HWND hWnd, int id, HWND src, UINT codeNotify) {
 	case IDM_FILE_OPEN_MBAACC:
 		do_open_file("MBAACC 0002.p%0002.p", callback_mbaacc);
 		break;
+	case IDM_FILE_OPEN_MBTL:
+		do_open_file("MBTL 0008.bin", callback_mbtl);
+		break;
 	case IDM_FILE_OPEN_OUGON:
 		do_open_folder("Open Ougon Musou Kyoku folder...", callback_ougon);
 		break;
@@ -1414,6 +1433,7 @@ static void init_menu() {
 	AppendMenu(hMenu, MF_STRING, IDM_FILE_OPEN_OUGON, "Open PC Ougon Musou Kyoku");
 	AppendMenu(hMenu, MF_STRING, IDM_FILE_OPEN_MBAA, "Open PS2 Melty Blood Actress Again...");
 	AppendMenu(hMenu, MF_STRING, IDM_FILE_OPEN_MBAACC, "Open PC Melty Blood AACC...");
+	AppendMenu(hMenu, MF_STRING, IDM_FILE_OPEN_MBTL, "Open PC Melty Blood Type Lumina...");
 	AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
 	AppendMenu(hMenu, MF_STRING, IDM_FILE_CLOSE, "Close");
 	AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);

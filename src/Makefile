@@ -11,6 +11,11 @@ OBJS =	framedisplay.o \
 	mbaacc_framedata.o \
 	mbaacc_cg.o \
 	mbaacc_pack.o \
+	mbtl_framedisplay.o \
+	mbtl_character.o \
+	mbtl_framedata.o \
+	mbtl_cg.o \
+	mbtl_pack.o \
 	touhou_framedisplay.o \
 	touhou_framedata.o \
 	touhou_packfiles.o \
