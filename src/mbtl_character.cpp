@@ -30,34 +30,37 @@ MBTL_Frame *MBTL_Character::get_frame(int seq_id, int frame_id) {
 	return 0;
 }
 
-void MBTL_Character::set_render_properties(const MBTL_Frame *frame, Texture *texture) {
-	texture->blend_mode(frame->AF.blend_mode);
-	if (frame->AF.blend_mode != 0) {
-		texture->color((float)frame->AF.red/255.0f,
-				 (float)frame->AF.green/255.0f,
-				 (float)frame->AF.blue/255.0f);
-		texture->alpha((float)frame->AF.alpha/255.0f);
+void MBTL_Character::set_render_properties(const Layer layer, const MBTL_Frame* frame, Texture *texture) {
+	texture->blend_mode(layer.blend_mode);
+	if (layer.blend_mode != 0) {
+		texture->color((float)layer.rgba[0]/255.0f,
+				 (float)layer.rgba[1]/255.0f,
+				 (float)layer.rgba[2]/255.0f);
+		texture->alpha((float)layer.rgba[3]/255.0f);
 	}
 
 	texture->rotate_clear();
-	if (frame->AF.z_rotation != 0.0f) {
-		texture->rotate_z(frame->AF.z_rotation);
+	if (layer.rotation[2] != 0.0f) {
+		texture->rotate_z(layer.rotation[2]);
 	}
-	if (frame->AF.x_rotation != 0.0f) {
-		texture->rotate_x(frame->AF.x_rotation);
+	if (layer.rotation[0] != 0.0f) {
+		texture->rotate_x(layer.rotation[0]);
 	}
-	if (frame->AF.y_rotation != 0.0f) {
-		texture->rotate_y(frame->AF.y_rotation);
+	if (layer.rotation[1] != 0.0f) {
+		texture->rotate_y(layer.rotation[1]);
 	}
 
-	if (frame->AF.has_zoom) {
-		texture->scale(frame->AF.zoom_x, frame->AF.zoom_y);
+	if (1) {
+		texture->scale(layer.scale[0], layer.scale[1]);
 	} else {
 		texture->scale_clear();
 	}
 }
 
 void MBTL_Character::render(const RenderProperties *properties, int seq_id, int frame_id) {
+  render2( properties, seq_id, frame_id);
+  return;
+  /*
 	if (!m_loaded) {
 		return;
 	}
@@ -67,26 +70,76 @@ void MBTL_Character::render(const RenderProperties *properties, int seq_id, int 
 	if (!frame) {
 		return;
 	}
+  // FILE *fp2 = fopen ("error.txt", "w");
+  // fprintf( fp2, "AAAAAAA %d %d %d", frame->AF.layers.size(), seq_id, frame_id  );
+  // fclose( fp2 );
 
-	if (properties->display_sprite && frame->AF.active && frame->AF.frame >= 0) {
+ 	if (properties->display_sprite && frame->AF.active && frame->AF.layers.size() > 0) {
+      //    if (properties->display_sprite && frame->AF.active && frame->AF.frame >= 0) {
+    int nzsid = -1;
+    int nzfid = 0;
+    for (Layer layer : frame->AF.layers ) {
+        if (layer.spriteId >= 0 && !layer.usePat) {
+            nzsid = layer.spriteId;
+            break;
+        }
+        nzfid += 1;
+    }
+    // FILE *fp4 = fopen ("error2.txt", "w");
+    // fprintf( fp4, "AAAAAAA %d %d %d %d", nzsid, nzfid, seq_id, frame_id  );
+    // fclose( fp4 );
+
 		// render sprite
-		if (!m_texture || m_last_sprite_id != frame->AF.frame) {
-			if (m_texture) {
-				delete m_texture;
+    if (m_textures.empty() || (m_last_sprite_id != nzsid && nzsid >= 0 )) {
+      if (!m_textures.empty()) {
+          m_textures.clear();
 			}
+      for ( uint32_t i = 0; i < frame->AF.layers.size(); ++i ) {
+          //MessageBox(NULL, "AA", "Save all images", MB_OK);
 
-			m_texture = m_cg.draw_texture(frame->AF.frame, m_palettes[m_active_palette], 1, 0);
+          if ( frame->AF.layers[i].spriteId < 0 || frame->AF.layers[i].usePat ) {
+              m_textures.push_back( 0 );
+              continue;
+          }
+          // FILE *fp3 = fopen ("error3.txt", "w+");
+          // fprintf( fp2, "AAAAAAA %d %d %d %d %d", i, seq_id, frame_id, nzsid,
+          //          frame->AF.layers[i].spriteId);
+          // fclose( fp3 );
 
-			m_last_sprite_id = frame->AF.frame;
+          m_textures.push_back( m_cg.draw_texture(frame->AF.layers[i].spriteId, m_palettes[m_active_palette], 1, 0) );
+      }
+
+			m_last_sprite_id = nzsid;
 		}
 
-		if (m_texture) {
-			set_render_properties(frame, m_texture);
+    bool drawn = false;
+		if (!m_textures.empty()) {
+        for ( Texture* tx : m_textures ) {
+            if ( tx ) {
+                m_texture = tx;
+                break;
+            }
+        }
+        for ( uint32_t i = 0; i < frame->AF.layers.size(); ++i ) {
+            if ( frame->AF.layers[i].spriteId < 0 || frame->AF.layers[i].usePat ||
+                 frame->AF.layers[i].spriteId != m_last_sprite_id || drawn ) {
+                continue;
+            }
+            //m_texture = m_textures[i];
+            // FILE *fp5 = fopen ("error4.txt", "w+");
+            // fprintf( fp5, "AAAAAAA %d %d %d %d", seq_id, frame_id, m_texture, i );
+            // fclose( fp5 );
 
-			m_texture->draw((frame->AF.offset_x-128)*2, (frame->AF.offset_y-224)*2, 2);
+            Layer layer = frame->AF.layers[i];
+            set_render_properties(layer, frame, m_texture);
+
+            if (!drawn) {
+                m_texture->draw((layer.offset_x-128)*2, (layer.offset_y-224)*2, 2);
+                drawn = true;
+            }
+        }
 		}
 	}
-
 	// render collision box
 	if (properties->display_collision_box) {
 		if (frame->hitboxes[0]) {
@@ -104,7 +157,7 @@ void MBTL_Character::render(const RenderProperties *properties, int seq_id, int 
 
 	if (properties->display_hit_box) {
 		nrects = 0;
-		for (int i = 1; i < 11; ++i) {
+		for (int i = 1; i < 9; ++i) {
 			if (frame->hitboxes[i]) {
 				copy_hitbox_to_rect(&rects[nrects], frame->hitboxes[i]);
 
@@ -115,6 +168,28 @@ void MBTL_Character::render(const RenderProperties *properties, int seq_id, int 
 		if (nrects > 0) {
 			render_boxes(BOX_HIT, rects, nrects, properties->display_solid_boxes);
 		}
+	}
+	// render special boxes
+	if (properties->display_attack_box) {
+      nrects = 0;
+      for (int i = 9; i < 11; ++i) {
+          if (frame->hitboxes[i]) {
+              copy_hitbox_to_rect(&rects[nrects], frame->hitboxes[i]);
+
+              ++nrects;
+          }
+      }
+      for (int i = 13; i < 25; ++i) {
+          if (frame->hitboxes[i]) {
+              copy_hitbox_to_rect(&rects[nrects], frame->hitboxes[i]);
+
+              ++nrects;
+          }
+      }
+
+      if (nrects > 0) {
+          render_boxes(BOX_SPECIAL, rects, nrects, properties->display_solid_boxes);
+      }
 	}
 
 	// render damage boxes
@@ -136,7 +211,194 @@ void MBTL_Character::render(const RenderProperties *properties, int seq_id, int 
 	// render clash boxes
 	if (properties->display_clash_box) {
 		nrects = 0;
-		for (int i = 11; i < 25; ++i) {
+		for (int i = 11; i < 13; ++i) {
+			if (frame->hitboxes[i]) {
+				copy_hitbox_to_rect(&rects[nrects], frame->hitboxes[i]);
+
+				++nrects;
+			}
+		}
+
+		if (nrects > 0) {
+			render_boxes(BOX_CLASH, rects, nrects, properties->display_solid_boxes);
+		}
+	}
+
+  */
+}
+
+
+void MBTL_Character::render2(const RenderProperties *properties, int seq_id, int frame_id) {
+	if (!m_loaded) {
+		return;
+	}
+
+	MBTL_Frame *frame = get_frame(seq_id, frame_id);
+
+	if (!frame) {
+		return;
+	}
+
+
+ 	if (properties->display_sprite && frame->AF.active && frame->AF.layers.size() > 0) {
+      //    if (properties->display_sprite && frame->AF.active && frame->AF.frame >= 0) {
+    int nzsid = -1;
+    int nzfid = 0;
+    for (Layer layer : frame->AF.layers ) {
+        if (layer.spriteId >= 0 && !layer.usePat) {
+            nzsid = layer.spriteId;
+            break;
+        }
+        nzfid += 1;
+    }
+     FILE *fp4 = fopen ("error2.txt", "w");
+     fprintf( fp4, "AAAAAAA %d %d %d %d", nzsid, nzfid, seq_id, frame_id  );
+     fclose( fp4 );
+
+		// render sprite
+     if ((m_textures.empty() || m_last_sprite_id != nzsid) && nzsid >= 0 ) {
+      if (!m_textures.empty()) {
+          m_textures.clear();
+          m_textures_x.clear();
+          m_textures_y.clear();
+			}
+      for ( uint32_t i = 0; i < frame->AF.layers.size(); ++i ) {
+          //MessageBox(NULL, "AA", "Save all images", MB_OK);
+
+          if ( frame->AF.layers[i].spriteId < 0 || frame->AF.layers[i].usePat ) {
+              m_textures.push_back( {0,0,0} );
+              //m_textures_x.push_back( 0);
+              //m_textures_y.push_back( 0);
+              continue;
+          }
+          // FILE *fp3 = fopen ("error3.txt", "w+");
+          // fprintf( fp2, "AAAAAAA %d %d %d %d %d", i, seq_id, frame_id, nzsid,
+          //          frame->AF.layers[i].spriteId);
+          // fclose( fp3 );
+
+          Layer layer = frame->AF.layers[i];
+          Texture* tx = m_cg.draw_texture(frame->AF.layers[i].spriteId, m_palettes[m_active_palette], 1, 0);
+          set_render_properties(layer, frame, tx);
+          m_textures.push_back({tx, layer.offset_x, layer.offset_y} );
+          //m_textures_x.push_back( layer.offset_x);
+          //m_textures_y.push_back( layer.offset_y);
+      }
+
+			m_last_sprite_id = nzsid;
+		}
+
+    for ( TexInfo tx : m_textures ) {
+        if ( tx.tex && nzsid >= 0 ) {
+            tx.tex->draw((tx.x_offset-128)*2, (tx.y_offset-224)*2, 2);
+        }
+    }
+    /*
+    bool drawn = false;
+		if (!m_textures.empty()) {
+        TexInfo t2;
+        for ( TexInfo tx : m_textures ) {
+            if ( tx.tex ) {
+                m_texture = tx.tex;
+                t2 = tx;
+                break;
+            }
+        }
+        for ( uint32_t i = 0; i < frame->AF.layers.size(); ++i ) {
+            if ( frame->AF.layers[i].spriteId < 0 || frame->AF.layers[i].usePat ||
+                 frame->AF.layers[i].spriteId != m_last_sprite_id || drawn ) {
+                continue;
+            }
+            //m_texture = m_textures[i];
+            // FILE *fp5 = fopen ("error4.txt", "w+");
+            // fprintf( fp5, "AAAAAAA %d %d %d %d", seq_id, frame_id, m_texture, i );
+            // fclose( fp5 );
+
+            Layer layer = frame->AF.layers[i];
+            //set_render_properties(layer, frame, m_texture);
+
+            if (!drawn) {
+                m_texture->draw((t2.x_offset-128)*2, (t2.y_offset-224)*2, 2);
+                //m_texture->draw((layer.offset_x-128)*2, (layer.offset_y-224)*2, 2);
+                drawn = true;
+            }
+        }
+    }
+    */
+	}
+
+
+	// render collision box
+	if (properties->display_collision_box) {
+		if (frame->hitboxes[0]) {
+			rect_t rect;
+
+			copy_hitbox_to_rect(&rect, frame->hitboxes[0]);
+
+			render_boxes(BOX_COLLISION, &rect, 1, properties->display_solid_boxes);
+		}
+	}
+
+	// render hitboxes
+	rect_t rects[32];
+	int nrects;
+
+	if (properties->display_hit_box) {
+		nrects = 0;
+		for (int i = 1; i < 9; ++i) {
+			if (frame->hitboxes[i]) {
+				copy_hitbox_to_rect(&rects[nrects], frame->hitboxes[i]);
+
+				++nrects;
+			}
+		}
+
+		if (nrects > 0) {
+			render_boxes(BOX_HIT, rects, nrects, properties->display_solid_boxes);
+		}
+	}
+	// render special boxes
+	if (properties->display_attack_box) {
+      nrects = 0;
+      for (int i = 9; i < 11; ++i) {
+          if (frame->hitboxes[i]) {
+              copy_hitbox_to_rect(&rects[nrects], frame->hitboxes[i]);
+
+              ++nrects;
+          }
+      }
+      for (int i = 13; i < 25; ++i) {
+          if (frame->hitboxes[i]) {
+              copy_hitbox_to_rect(&rects[nrects], frame->hitboxes[i]);
+
+              ++nrects;
+          }
+      }
+
+      if (nrects > 0) {
+          render_boxes(BOX_SPECIAL, rects, nrects, properties->display_solid_boxes);
+      }
+	}
+
+	// render damage boxes
+	if (properties->display_attack_box) {
+		nrects = 0;
+		for (int i = 25; i < 33; ++i) {
+			if (frame->hitboxes[i]) {
+				copy_hitbox_to_rect(&rects[nrects], frame->hitboxes[i]);
+
+				++nrects;
+			}
+		}
+
+		if (nrects > 0) {
+			render_boxes(BOX_ATTACK, rects, nrects, properties->display_solid_boxes);
+		}
+	}
+
+	// render clash boxes
+	if (properties->display_clash_box) {
+		nrects = 0;
+		for (int i = 11; i < 13; ++i) {
 			if (frame->hitboxes[i]) {
 				copy_hitbox_to_rect(&rects[nrects], frame->hitboxes[i]);
 
@@ -149,6 +411,7 @@ void MBTL_Character::render(const RenderProperties *properties, int seq_id, int 
 		}
 	}
 }
+
 
 Clone *MBTL_Character::make_clone(int seq_id, int fr_id) {
 	if (!m_loaded) {
@@ -163,15 +426,26 @@ Clone *MBTL_Character::make_clone(int seq_id, int fr_id) {
 
 	Clone *clone = new Clone;
 
-	if (frame->AF.active && frame->AF.frame >= 0) {
+	if (frame->AF.active && frame->AF.layers.size() > 0) {
+      // TODO: fix
 		Texture *texture;
 
-		texture = m_cg.draw_texture(frame->AF.frame, m_palettes[m_active_palette], 1, 0);
+    int nzsid = -1;
+    int nzfid = 0;
+    for (Layer layer : frame->AF.layers ) {
+        if (layer.spriteId >= 0 && !layer.usePat) {
+            nzsid = layer.spriteId;
+            break;
+        }
+        nzfid += 1;
+    }
+
+		texture = m_cg.draw_texture(nzsid, m_palettes[m_active_palette], 1, 0);
 
 		if (texture) {
-			set_render_properties(frame, texture);
+        set_render_properties(frame->AF.layers[nzfid], frame, texture);
 
-			clone->init_texture(texture, (frame->AF.offset_x-128)*2, (frame->AF.offset_y-224)*2, 2);
+			clone->init_texture(texture, (frame->AF.layers[nzfid].offset_x-128)*2, (frame->AF.layers[nzfid].offset_y-224)*2, 2);
 		}
 	}
 
@@ -315,7 +589,7 @@ void MBTL_Character::render_frame_properties(bool detailed, int scr_width, int s
 
 }
 
-void MBTL_Character::load_graphics(MBTL_Pack *pack) {
+void MBTL_Character::load_graphics(MBTL_Pack *pack, int size, int offset) {
 	if (!m_loaded) {
 		return;
 	}
@@ -324,7 +598,7 @@ void MBTL_Character::load_graphics(MBTL_Pack *pack) {
 
 	// read image and alignment data
 	sprintf(filename, "%s.CG", m_name);
-	if (!m_cg.load(pack, filename)) {
+	if (!m_cg.load(pack, filename, size, offset)) {
 		return;
 	}
 
@@ -339,21 +613,22 @@ void MBTL_Character::unload_graphics() {
 	m_cg.free();
 }
 
-bool MBTL_Character::load(MBTL_Pack *pack, const char *name, int sub_type) {
+bool MBTL_Character::load(MBTL_Pack *pack, const char *name, const int* sizes, const int* offsets ) {
 	if (m_loaded) {
 		return 0;
 	}
-
 	char filename[256];
 
 	// read frame data
 	sprintf(filename, "%s.HA6", name);
-	if (!m_framedata.load(pack, filename)) {
-		printf("load fail\n");
-		return 0;
+	if (!m_framedata.load(pack, filename, sizes[0], offsets[0])) {
+      return 0;
 	}
 
-  // TODO: update with tl
+	sprintf(filename, "%s_9.HA6", name);
+  m_framedata.load(pack, filename, sizes[1], offsets[1]);
+
+  // TODO: Movelists
   /*
 	sprintf(filename, "%s_r.HA6", name);
 	m_framedata.load(pack, filename);
@@ -381,11 +656,11 @@ bool MBTL_Character::load(MBTL_Pack *pack, const char *name, int sub_type) {
 	char *data;
 	unsigned int size;
 
-	if (pack->read_file(filename, &data, &size)) {
+	if (pack->read_file(filename, &data, &size, sizes[2], offsets[2])) {
 		for (int i = 0; i < 36; ++i) {
 			m_palettes[i] = new unsigned int[256];
 
-			memcpy(m_palettes[i], data + (i * 1024) + 4, 1024);
+			memcpy(m_palettes[i], data + (i * 1024) + 16, 1024);
 
 			unsigned int *p = m_palettes[i];
 			for (int j = 0; j < 256; ++j) {
@@ -632,8 +907,19 @@ const char *MBTL_Character::get_current_sprite_filename(int seq_id, int fr_id) {
 		return 0;
 	}
 
-	if (frame->AF.active && frame->AF.frame >= 0) {
-		return m_cg.get_filename(frame->AF.frame);
+	if (frame->AF.active && frame->AF.layers.size() > 0) {
+      int nzsid = -1;
+      int nzfid = 0;
+      for (Layer layer : frame->AF.layers ) {
+          if (layer.spriteId >= 0 && !layer.usePat) {
+              nzsid = layer.spriteId;
+              break;
+          }
+          nzfid += 1;
+      }
+
+
+		return m_cg.get_filename(frame->AF.layers[nzfid].spriteId);
 	}
 
 	return 0;
@@ -666,10 +952,26 @@ bool MBTL_Character::save_current_sprite(const char *filename, int seq_id, int f
 		return 0;
 	}
 
-	if (frame->AF.active && frame->AF.frame >= 0) {
-		return do_sprite_save(frame->AF.frame, filename);
+  // FILE *fp2 = fopen ("error.txt", "w");
+  // fprintf( fp2, "AAAAAAA %s %d %d", filename, seq_id, fr_id  );
+
+	if (frame->AF.active && frame->AF.layers.size() > 0) {
+      //TODO:fix
+      int nzsid = -1;
+      int nzfid = 0;
+      for (Layer layer : frame->AF.layers ) {
+          if (layer.spriteId >= 0 && !layer.usePat) {
+              nzsid = layer.spriteId;
+              break;
+          }
+          nzfid += 1;
+      }
+
+      //fprintf( fp2, "AAAAAAA %d %d %d", nzsid, seq_id, fr_id  );
+      return do_sprite_save(nzsid, filename);
 	}
 
+  //fclose( fp2 );
 	return 0;
 }
 

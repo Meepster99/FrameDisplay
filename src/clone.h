@@ -1,6 +1,8 @@
 #ifndef CLONE_H
 #define CLONE_H
 
+#include <vector>
+
 #include "texture.h"
 #include "render.h"
 #include "framedisplay.h"
@@ -13,6 +15,7 @@ struct CloneHitbox {
 class Clone {
 private:
 	Texture		*m_texture;
+  std::vector<Texture*>		m_textures;
 	int		m_texture_x;
 	int		m_texture_y;
 	int		m_texture_scale;

@@ -4,6 +4,7 @@
 #include <string>
 #include <list>
 #include <map>
+#include <vector>
 
 #include "framedisplay.h"
 
@@ -61,7 +62,7 @@ protected:
 
 	const MBTL_CG_Image	*get_image(unsigned int n);
 public:
-	bool			load(MBTL_Pack *pack, const char *name);
+    bool			load(MBTL_Pack *pack, const char *name, int size, int offset);
 
 	void			free();
 
@@ -83,6 +84,18 @@ public:
 
 struct MBTL_Hitbox {
 	short x1, y1, x2, y2;
+};
+
+struct Layer{
+    int spriteId;
+    bool usePat;
+    int offset_y;
+    int offset_x;
+    int blend_mode;
+    float rgba[4]{1,1,1,1};
+    float rotation[3]{}; //XYZ
+    float scale[2]{1,1};//xy
+    int priority;
 };
 
 struct MBTL_Frame_AF {
@@ -114,6 +127,43 @@ struct MBTL_Frame_AF {
 	float		zoom_y;
 
 	int		AFJP;
+};
+
+struct MBTL_Frame_AF2 {
+	// rendering data
+  bool		active;
+	std::vector<Layer> layers;
+	int		duration;
+	/* Animation action
+	0 (default): End
+	1: Next
+	2: Jump to frame
+	3: Go to start of seq??
+	*/
+	int aniType;
+
+	// Bit flags. First 4 bits only
+	unsigned int aniFlag;
+
+	//Depends on aniflag.
+	//If (0)end, it jumps to the number of the sequence
+	//If (2)jump, it jumps to the number of the frame of the seq.
+	//It seems to do nothing if the aniflag is 1(next).
+	int jump;
+
+	int landJump; //Jumps to this frame if landing.
+	//1-5: Linear, Fast end, Slow end, Fast middle, Slow Middle. The last type is not used in vanilla
+	int interpolationType;
+	int priority; // Default is 0. Used in throws and dodge.
+	int loopCount; //Times to loop, it's the frame just before the loop.
+	int loopEnd; //The frame number is not part of the loop.
+
+	bool AFRT; //Makes rotation respect EF scale.
+
+	//New, from UNI
+	bool afjh;
+	uint8_t param[4]; //Let's hope they're right;
+	int frameId;
 };
 
 struct MBTL_Frame_AS {
@@ -157,7 +207,7 @@ struct MBTL_Frame_IF {
 };
 
 struct MBTL_Frame {
-	MBTL_Frame_AF	AF;
+	MBTL_Frame_AF2	AF;
 
 	MBTL_Frame_AS	*AS;
 	MBTL_Frame_AT	*AT;
@@ -167,6 +217,7 @@ struct MBTL_Frame {
 
 	MBTL_Hitbox	*hitboxes[33];
 };
+
 
 struct MBTL_Sequence {
 	// sequence property data
@@ -201,6 +252,25 @@ struct MBTL_Sequence {
 	unsigned int	nIF;
 };
 
+/*
+struct MBTL_Sequence {
+	// sequence property data
+	std::string	name;
+	std::string codeName;
+
+	int psts;
+	int level;
+	int flag;
+
+	bool empty;
+	bool initialized;
+
+	std::vector<MBTL_Frame> frames;
+
+	Sequence();
+};
+*/
+
 class MBTL_FrameData {
 private:
 	MBTL_Sequence	**m_sequences;
@@ -208,9 +278,9 @@ private:
 
 	bool		m_loaded;
 public:
-	bool		load(MBTL_Pack *pack, const char *filename);
+  bool		load(MBTL_Pack *pack, const char *filename, int size, int offset);
 
-	bool		load_move_list(MBTL_Pack *pack, const char *filename);
+  bool		load_move_list(MBTL_Pack *pack, const char *filename, int size, int offset);
 
 	int		get_sequence_count();
 
@@ -224,6 +294,12 @@ public:
 
 
 // ************************************************** mbtl_character.cpp
+
+struct TexInfo {
+    Texture* tex;
+    int x_offset;
+    int y_offset;
+};
 
 class MBTL_Character {
 protected:
@@ -240,20 +316,24 @@ protected:
 	int		m_active_palette;
 
 	Texture		*m_texture;
+  std::vector<TexInfo> m_textures;
+  std::vector<int> m_textures_x;
+  std::vector<int> m_textures_y;
 	int		m_last_sprite_id;
 
 	bool		do_sprite_save(int id, const char *filename);
 
 	MBTL_Frame *	get_frame(int seq_id, int fr_id);
 
-	void		set_render_properties(const MBTL_Frame *frame, Texture *texture);
+  void		set_render_properties(const Layer layer, const MBTL_Frame *frame, Texture *texture);
 public:
-	bool		load(MBTL_Pack *pack, const char *name, int sub_type);
+  bool		load(MBTL_Pack *pack, const char *name, const int* sizes, const int* offsets);
 
-	void		load_graphics(MBTL_Pack *pack);
+  void		load_graphics(MBTL_Pack *pack, int size, int offset);
 	void		unload_graphics();
 
 	void		render(const RenderProperties *properties, int seq, int frame);
+    void		render2(const RenderProperties *properties, int seq, int frame);
 	Clone		*make_clone(int seq_id, int fr_id);
 
 	void		flush_texture();

@@ -10,7 +10,8 @@ enum BoxType {
 	BOX_COLLISION = 1,
 	BOX_HIT = 2,
 	BOX_ATTACK = 3,
-	BOX_CLASH = 4
+	BOX_CLASH = 4,
+	BOX_SPECIAL = 5
 };
 
 extern void render_font_init();

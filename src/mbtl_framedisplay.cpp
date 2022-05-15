@@ -13,108 +13,35 @@ struct MBTL_Character_Info {
 	const char	*long_name;
 	const char	*short_name;
 	const char	*file_name;
-	int		moon;
+  /*
+  int		ha6_size;
+	int		ha6_offset;
+  int		ha6_9_size;
+  int		ha6_9_offset;
+  int		pal_size;
+  int		pal_offset;
+  int		cg_size;
+  int		cg_offset;
+  */
+  int sizes[4];
+  int offsets[4];
 };
 
 static const MBTL_Character_Info mbtl_character_info[] = {
-  {"TL Arc",		"TL-ARC",	"chr000",	0	},
-	{"C Akiha",		"C-AKIHA",	"AKIHA",	0	},
-	{"F Akiha",		"F-AKIHA",	"AKIHA",	1	},
-	{"H Akiha",		"H-AKIHA",	"AKIHA",	2	},
-	{"C V.Akiha",		"C-AKAAKIHA",	"AKAAKIHA",	0	},
-	{"F V.Akiha",		"F-AKAAKIHA",	"AKAAKIHA",	1	},
-	{"H V.Akiha",		"H-AKAAKIHA",	"AKAAKIHA",	2	},
-	{"C S.Akiha",		"C-S_AKIHA",	"S_AKIHA",	0	},
-	{"F S.Akiha",		"F-S_AKIHA",	"S_AKIHA",	1	},
-	{"H S.Akiha",		"H-S_AKIHA",	"S_AKIHA",	2	},
-	{"C Aoko",		"C-AOKO",	"AOKO",		0	},
-	{"F Aoko",		"F-AOKO",	"AOKO",		1	},
-	{"H Aoko",		"H-AOKO",	"AOKO",		2	},
-	{"C Arcueid",		"C-ARC",	"ARC",		0	},
-	{"F Arcueid",		"F-ARC",	"ARC",		1	},
-	{"H Arcueid",		"H-ARC",	"ARC",		2	},
-	{"C Warcueid",		"C-WARC",	"WARC",		0	},
-	{"F Warcueid",		"F-WARC",	"WARC",		1	},
-	{"H Warcueid",		"H-WARC",	"WARC",		2	},
-	{"C Archetype",		"C-P_ARC",	"P_ARC",	0	},
-	{"F Archetype",		"F-P_ARC",	"P_ARC",	1	},
-	{"H Archetype",		"H-P_ARC",	"P_ARC",	2	},
-	{"C Ciel",		"C-CIEL",	"CIEL",		0	},
-	{"F Ciel",		"F-CIEL",	"CIEL",		1	},
-	{"H Ciel",		"H-CIEL",	"CIEL",		2	},
-	{"C P.Ciel",		"C-P_CIEL",	"P_CIEL",		0	},
-	{"F P.Ciel",		"F-P_CIEL",	"P_CIEL",		1	},
-	{"H P.Ciel",		"H-P_CIEL",	"P_CIEL",		2	},
-	{"C Hisui",		"C-HISUI",	"HISUI",	0	},
-	{"F Hisui",		"F-HISUI",	"HISUI",	1	},
-	{"H Hisui",		"H-HISUI",	"HISUI",	2	},
-	{"C Kouma",		"C-KISHIMA",	"KISHIMA",	0	},
-	{"F Kouma",		"F-KISHIMA",	"KISHIMA",	1	},
-	{"H Kouma",		"H-KISHIMA",	"KISHIMA",	2	},
-	{"C Kohaku",		"C-KOHAKU",	"KOHAKU",	0	},
-	{"F Kohaku",		"F-KOHAKU",	"KOHAKU",	1	},
-	{"H Kohaku",		"H-KOHAKU",	"KOHAKU",	2	},
-	{"C Kohaku M",		"C-KOHAKU_M",	"KOHAKU_M",	0	},
-	{"F Kohaku M",		"F-KOHAKU_M",	"KOHAKU_M",	1	},
-	{"H Kohaku M",		"H-KOHAKU_M",	"KOHAKU_M",	2	},
-	{"C Len",		"C-LEN",	"LEN",		0	},
-	{"F Len",		"F-LEN",	"LEN",		1	},
-	{"H Len",		"H-LEN",	"LEN",		2	},
-	{"C W.Len",		"C-WLEN",	"WLEN",		0	},
-	{"F W.Len",		"F-WLEN",	"WLEN",		1	},
-	{"H W.Len",		"H-WLEN",	"WLEN",		2	},
-	{"C M.Hisui",		"C-M_HISUI",	"M_HISUI",	0	},
-	{"F M.Hisui",		"F-M_HISUI",	"M_HISUI",	1	},
-	{"H M.Hisui",		"H-M_HISUI",	"M_HISUI",	2	},
-	{"C M.Hisui M",		"C-M_HISUI_M",	"M_HISUI_M",	0	},
-	{"F M.Hisui M",		"F-M_HISUI_M",	"M_HISUI_M",	1	},
-	{"H M.Hisui M",		"H-M_HISUI_M",	"M_HISUI_M",	2	},
-	{"C P.Hisui P",		"C-M_HISUI_P",	"M_HISUI_P",	0	},
-	{"F P.Hisui P",		"F-M_HISUI_P",	"M_HISUI_P",	1	},
-	{"H P.Hisui P",		"H-M_HISUI_P",	"M_HISUI_P",	2	},
-	{"C Miyako",		"C-MIYAKO",	"MIYAKO",	0	},
-	{"F Miyako",		"F-MIYAKO",	"MIYAKO",	1	},
-	{"H Miyako",		"H-MIYAKO",	"MIYAKO",	2	},
-	{"C Nanaya",		"C-NANAYA",	"NANAYA",	0	},
-	{"F Nanaya",		"F-NANAYA",	"NANAYA",	1	},
-	{"H Nanaya",		"H-NANAYA",	"NANAYA",	2	},
-	{"C Neco Arc",		"C-NECO",	"NECO",		0	},
-	{"F Neco Arc",		"F-NECO",	"NECO",		1	},
-	{"H Neco Arc",		"H-NECO",	"NECO",		2	},
-	{"C Neco Arc P",	"C-NECO_P",	"NECO_P",	0	},
-	{"F Neco Arc P",	"F-NECO_P",	"NECO_P",	1	},
-	{"H Neco Arc P",	"H-NECO_P",	"NECO_P",	2	},
-	{"C Neco Chaos",	"C-NECHAOS",	"NECHAOS",	0	},
-	{"F Neco Chaos",	"F-NECHAOS",	"NECHAOS",	1	},
-	{"H Neco Chaos",	"H-NECHAOS",	"NECHAOS",	2	},
-	{"C Nero",		"C-NERO",	"NERO",		0	},
-	{"F Nero",		"F-NERO",	"NERO",		1	},
-	{"H Nero",		"H-NERO",	"NERO",		2	},
-	{"C Riesbyfe",		"C-RIES",	"RIES",		0	},
-	{"F Riesbyfe",		"F-RIES",	"RIES",		1	},
-	{"H Riesbyfe",		"H-RIES",	"RIES",		2	},
-	{"C Roa",		"C-ROA",	"ROA",		0	},
-	{"F Roa",		"F-ROA",	"ROA",		1	},
-	{"H Roa",		"H-ROA",	"ROA",		2	},
-	{"C Ryougi",		"C-RYOUGI",	"RYOUGI",	0	},
-	{"F Ryougi",		"F-RYOUGI",	"RYOUGI",	1	},
-	{"H Ryougi",		"H-RYOUGI",	"RYOUGI",	2	},
-	{"C Satsuki",		"C-SATSUKI",	"SATSUKI",	0	},
-	{"F Satsuki",		"F-SATSUKI",	"SATSUKI",	1	},
-	{"H Satsuki",		"H-SATSUKI",	"SATSUKI",	2	},
-	{"C Shiki",		"C-SHIKI",	"SHIKI",	0	},
-	{"F Shiki",		"F-SHIKI",	"SHIKI",	1	},
-	{"H Shiki",		"H-SHIKI",	"SHIKI",	2	},
-	{"C Sion",		"C-SION",	"SION",		0	},
-	{"F Sion",		"F-SION",	"SION",		1	},
-	{"H Sion",		"H-SION",	"SION",		2	},
-	{"C V.Sion",		"C-V_SION",	"V_SION",	0	},
-	{"F V.Sion",		"F-V_SION",	"V_SION",	1	},
-	{"H V.Sion",		"H-V_SION",	"V_SION",	2	},
-	{"C Warakia",		"C-WARAKIA",	"WARAKIA",	0	},
-	{"F Warakia",		"F-WARAKIA",	"WARAKIA",	1	},
-	{"H Warakia",		"H-WARAKIA",	"WARAKIA",	2	},
-	{"Effect",		"EFFECT",	"EFFECT",	-1	},
+  {"Arcueid",		"ARC",	"chr000", { 0x00059D66,0x0143C3, 0xF010, 0x019D0848}, {0x019F1AFF,0x0412767D, 0x01A5FD4D, 0x0212B7 }	},
+  {"Hisui",		"HIS",	"chr001", { 0x5f672, 0xdc38, 0xf010, 0x27a7128 }, {0x6951d99, 0x995cf51, 0x69c5f93, 0x41aac71}	},
+  {"S.Akiha",		"SAK",	"chr002", { 0x4636b, 0xa8a0, 0xf010, 0x1e13d60}, {0xb801ae6, 0xd9bb185, 0xb85bc59, 0x99edd86 } },
+  {"Shiki",		"SIK",	"chr003", { 0x4f87a, 0xf699, 0xf010, 0x1cfa5a8}, {0xf72e7d3, 0x11e5b86d, 0xf7923f5, 0xda3422b } },
+  {"Kohaku",		"KOH",	"chr004", { 0x62d8b, 0xd40d, 0xf010, 0x2a0ee98}, {0x148eb626, 0x17026fde, 0x14963cd9, 0x11edc78e } },
+  {"Roa",		"ROA",	"chr005", { 0x4dbea, 0x4ed8, 0xf010, 0x2087808}, {0x1913bbb5, 0x1b8a1fda, 0x1919d547, 0x170b43ad } },
+  {"Kouma",		"KIS",	"chr006", { 0x5005f, 0x3ee5, 0xf010, 0x1eccb58}, {0x1d7c4a8d, 0x1fe8cee4, 0x1d828694, 0x1b8f7f35 } },
+  //{"Maids",		"HNK",	"chr007", { 
+  {"Noel",		"NOE",	"chr008", { 0x55cbb, 0xee39, 0xf010, 0x2936a38}, {0x228138f7, 0x268e7143, 0x2287d9ba, 0x1fedcebf } },
+  {"VLOV",		"VLO",	"chr009", { 0x5a9d0, 0xd102, 0xf010, 0x2f06c10}, {0x29877cd1, 0x2bf1885d, 0x298e64c9, 0x269710c1 } },
+  {"Warcueid",		"BOA",	"chr010", { 0x4da6b, 0xdcc8, 0xf010, 0x2351020}, {0x2e2ecc35, 0x31b5da3e, 0x2e34e9a8, 0x2bf9bc15 } },
+  {"Ciel",		"CIE",	"chr011",	{ 0x60867, 0x41ee, 0xf010, 0x2875a38}, {0x34450db6, 0x370514df, 0x344c6125, 0x31bdb37e } },
+  {"Saber",		"ALT",	"chr012", { 0x6c59b, 0x4ab1, 0xf010, 0x3c96630}, {0x3ad59372, 0x3d8553d4, 0x3addeeb5, 0x370c2d42 } },
+  {"Miyako",		"MIY",	"chr013", { 0x4ce8f, 0x3488, 0xf010, 0x18ef968}, {0x3f19da14, 0x419f431f, 0x3f1ff00b, 0x3d8ae0ac } },
 };
 
 static const int mbtl_ncharacter_info = sizeof(mbtl_character_info)/sizeof(mbtl_character_info[0]);
@@ -286,9 +213,14 @@ void MBTL_FrameDisplay::set_active_character(int n) {
 		m_character_data.free_frame_data();
 	}
 
-	if (m_character_data.load(&m_pack, mbtl_character_info[n].file_name, mbtl_character_info[n].moon)) {
+	if (m_character_data.load(&m_pack, mbtl_character_info[n].file_name,
+                            mbtl_character_info[n].sizes,
+                            mbtl_character_info[n].offsets )) {
 		if (need_gfx) {
-			m_character_data.load_graphics(&m_pack);
+        m_character_data.load_graphics(&m_pack,
+                                       mbtl_character_info[n].sizes[3],
+                                       mbtl_character_info[n].offsets[3]
+                                       );
 		}
 	}
 	m_character = n;
@@ -303,11 +235,9 @@ bool MBTL_FrameDisplay::init(const char *filename) {
 		return 1;
 	}
 
-  /*
 	if (!m_pack.open_pack(filename)) {
 		return 0;
 	}
-	*/
 
 	// finish up
 	if (!FrameDisplay::init()) {

@@ -147,6 +147,7 @@ static int window_height = 480;
 static int window_width = 640;
 static float position_x = 180.0/640.0;
 static float position_y = 400.0/480.0;
+static float zoom = 1.0;
 
 static bool render = 0;
 
@@ -190,14 +191,14 @@ static void display_axis(float x, float y, bool clone_color) {
 
 static void draw_fdisp(const RenderProperties *properties) {
 	glPushMatrix();
-	glTranslatef((int)(position_x*window_width), (int)(position_y*window_height), 0.0);
+	glTranslatef((int)(position_x*window_width), (int)(position_y*window_height), 0);
 	
+  glScalef(1.0*zoom, 1.0*zoom, 1.0);
 	if (toggle_view_flip.get()) {
 		glScalef(-1.0, 1.0, 1.0);
 	}
 	
 	framedisplay->render(properties);
-	
 	glPopMatrix();
 }
 
@@ -275,6 +276,7 @@ static void draw_opengl() {
 				glPushMatrix();
 				glTranslatef((int)(j->x*window_width), (int)(j->y*window_height), 0.0);
 
+        glScalef(zoom, zoom, 1.0);
 				if (j->flip) {
 					glScalef(-1.0, 1.0, 1.0);
 				}
@@ -492,7 +494,7 @@ static LRESULT CALLBACK opengl_window_proc(HWND hWnd, UINT Msg, WPARAM wParam, L
 			}
 			break;
 	}
-	
+
 	return DefWindowProc(hWnd, Msg, wParam, lParam);
 }
 
@@ -555,6 +557,7 @@ static bool init_opengl(HWND hWnd) {
 	
 	position_x = 180.0/640.0;
 	position_y = 400.0/480.0;
+  zoom = 1.0;
 	
 	RECT rect;
 	GetClientRect(hWnd, &rect);
@@ -792,6 +795,7 @@ static void set_framedisplay(FrameDisplay *fdisp) {
 	// reset defaults
 	position_x = 180.0/640.0;
 	position_y = 400.0/480.0;
+  zoom = 1.0;
 	
 	toggle_view_animate.set(0);
 	toggle_view_flip.set(0);
@@ -863,9 +867,7 @@ static void callback_mbaacc(const char *filename) {
 }
 
 static void callback_mbtl(const char *filename) {
-  FrameDisplay *fdisp2 = new MBTL_FrameDisplay();
-	FrameDisplay *fdisp = new MBAACC_FrameDisplay();
-	fdisp2->init(filename);
+  FrameDisplay *fdisp = new MBTL_FrameDisplay();
 	if (!fdisp->init(filename)) {
 		delete fdisp;
 		return;
@@ -1724,6 +1726,24 @@ static LRESULT CALLBACK window_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM l
 				}
 			}
 			break;
+    case WM_MOUSEWHEEL:
+        int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+        if ( zDelta < 0 ) {
+            zoom *= 0.8;
+        } else {
+            zoom *= 1.25;
+        }
+        //zoom += (float)zDelta /1200.0;
+        /*
+        if ( zoom < 0.1 ) {
+            zoom = 0.1;
+        }
+        if ( zoom > 20 ) {
+            zoom = 20.0;
+        }
+        */
+        draw_opengl();
+        break;
 	}
 	
 	return DefWindowProc(hWnd, Msg, wParam, lParam);

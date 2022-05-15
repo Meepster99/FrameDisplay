@@ -67,7 +67,7 @@ static void display_scene() {
 	display_axis();
 	
 	glPushMatrix();
-	glTranslatef(position_x, position_y, 0.0);
+	glTranslatef(position_x, position_y, 10.0);
 	glScalef(window_scale, window_scale, 1.0);
 	
 	static const RenderProperties props = {

@@ -421,6 +421,9 @@ void render_boxes(BoxType box_type, rect_t *rects, int nrects, bool solid) {
 		case BOX_CLASH:
 			glColor4f(1.0, 1.0, 0.3, 0.3);
 			break;
+		case BOX_SPECIAL:
+        glColor4f(0.2, 0.2, 1.0, 0.3);
+        break;
 		default:
 			return;
 		}
@@ -478,6 +481,9 @@ void render_boxes(BoxType box_type, rect_t *rects, int nrects, bool solid) {
 	case BOX_CLASH:
 		glColor4f(1.0, 1.0, 0.3, 1.0);
 		break;
+  case BOX_SPECIAL:
+      glColor4f(0.0, 0.0, 0.1, 0.3);
+      break;
 	default:
 		return;
 	}

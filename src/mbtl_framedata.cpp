@@ -7,7 +7,6 @@
 #include <list>
 
 #include <cstring>
-
 struct TempInfo {
 	MBTL_Sequence	*seq;
 
@@ -17,6 +16,24 @@ struct TempInfo {
 	unsigned int	cur_EF;
 	unsigned int	cur_IF;
 };
+/*
+struct TempInfo {
+    struct DelayLoad
+    {
+        unsigned int frameNo;
+        unsigned int location;
+        unsigned int source;
+    };
+    Sequence	*seq;
+    std::vector<Hitbox*> boxesRefs;
+    std::vector<DelayLoad> delayLoadList;
+    unsigned int cur_hitbox;
+    unsigned int cur_AS;
+    unsigned int cur_frame;
+
+    std::vector<Frame_AS*> AS;
+};
+*/
 
 // local recursive frame data loader
 
@@ -37,6 +54,9 @@ static unsigned int *fd_frame_AT_load(unsigned int *data, const unsigned int *da
 		if (!memcmp(buf, "ATGD", 4)) {
 			AT->guard_flags = data[0];
 			++data;
+		} else if (!memcmp(buf, "ATV2", 4)) {
+      //TODO: later:
+      data += 12;
 		} else if (!memcmp(buf, "ATHS", 4)) {
 			AT->proration = data[0];
 			++data;
@@ -50,26 +70,91 @@ static unsigned int *fd_frame_AT_load(unsigned int *data, const unsigned int *da
 		} else if (!memcmp(buf, "ATHT", 4)) {
 			AT->proration_type = data[0];
 			data += 1;
+		} else if (!memcmp(buf, "ATHH", 4)) {
+      //TODO: later:
+      //AT->proration_type = data[0];
+      data += 1;
+		} else if (!memcmp(buf, "ATGV", 4)) {
+			//First number can be different from 3. See CMHisui's 421C
+			//Second byte is a flag. Extract it separately.
+			// assert(0); //Melty only?
+			// assert(data[0] <= 3);
+			// for(int i = 0; i < data[0]; i++)
+			// {
+			// 	AT->guardVector[i] = data[i+1] & 0xFF;
+			// 	AT->gVFlags[i] = data[i+1] >> 8;
+			// 	//Only old ckohamech has buggy flag values.
+			// }
+			data += data[0]+1;
+		} else if (!memcmp(buf, "ATHV", 4)) {
+			// assert(0); //Melty only?
+			// assert(data[0] <= 3);
+			// for(int i = 0; i < data[0]; i++)
+			// {
+			// 	AT->hitVector[i] = data[i+1] & 0xFF;
+			// 	AT->hVFlags[i] = data[i+1] >> 8;
+			// }
+			data += data[0]+1;
+		} else if (!memcmp(buf, "ATF1", 4)) {
+      // AT->otherFlags = data[0];
+
+ 			/* if(data[0] != 0)
+			{
+				test.Print(data, data_end);
+				std::cout << "ATF1 "<< data[0]<<"\n";
+			} */
+			++data;
+		} else if (!memcmp(buf, "ATAT", 4)) {
+        //AT->damage = *data;
+			data += 1;
+		} else if (!memcmp(buf, "ATAM", 4)) {
+        //AT->minDamage = *data;
+			data += 1;
+		} else if (!memcmp(buf, "ATCA", 4)) {
+        //AT->meter_gain = *data;
+			data += 1;
+		} else if (!memcmp(buf, "ATC0", 4)) {
+        //memcpy(AT->hitStunDecay, data, sizeof(int)*3);
+			data += 3;
+		} else if (!memcmp(buf, "ATHE", 4)) {
+        //AT->hitEffect = data[0];
+        //AT->soundEffect = data[1];
+			data += 2;
+		} else if (!memcmp(buf, "ATKK", 4)) {
+        //AT->addedEffect = data[0];
+			//Uni uses higher values.
+			data++;
+		} else if (!memcmp(buf, "ATNG", 4)) {
+			//Melty only uses 1. UNI uses higher values.
+			//AT->hitgrab = data[0];
+			data++;
+		} else if (!memcmp(buf, "ATUH", 4)) {
+        //AT->extraGravity = ((float*)data)[0];
+			data++;
+		} else if (!memcmp(buf, "ATBT", 4)) {
+        //AT->breakTime = data[0];
+			data++;
+		} else if (!memcmp(buf, "ATSN", 4)) {
+        //AT->hitStopTime = data[0];
+			data++;
+		} else if (!memcmp(buf, "ATSU", 4)) {
+        //AT->untechTime = data[0];
+			data++;
+		} else if (!memcmp(buf, "ATSP", 4)) {
+        //AT->hitStop = data[0];
+			data++;
+		} else if (!memcmp(buf, "ATSA", 4)) {
+        //AT->addHitStun = data[0];
+			data++;
+		} else if (!memcmp(buf, "ATSH", 4)) {
+        //AT->hitStun = data[0];
+			data++;
+		} else if (!memcmp(buf, "ATGN", 4)) {
+        //AT->blockStopTime = data[0];
+			data++;
 		} else if (!memcmp(buf, "ATED", 4)) {
 			break;
 		}
-
-
-
-		// unhandled:
-		// ATGV(V) - ?
-		// ATHV(V) - ?
-		// ATHE(2) - ?
-		// ATF1(1) - stun?
-		// ATKK(1) - ?
-		// ATNG(1) - ?
-		// ATUH(1) - ?
-		// ATGN(1) - ?
-		// ATBT(1) - ?
-		// ATSN(1) - ?
-		// ATSU(1) - ?
-		// ATSP(1) - ?
-		// (no others)
 	}
 
 	return data;
@@ -124,6 +209,47 @@ static unsigned int *fd_frame_AS_load(unsigned int *data, const unsigned int *da
 
 			data += 7;
 			 */
+    } else if (!memcmp(buf, "ASCF", 4)) {
+        //AS->ascf = data[0];
+			data++;
+		} else if (!memcmp(buf, "AST0", 4)) {
+			// AS->sineFlags = data[0] & 0xFF; //Other values have no effect.
+			// memcpy(AS->sineParameters, data+1, sizeof(int)*4);
+			// AS->sinePhases[0] = ((float*)data)[5];
+			// AS->sinePhases[1] = ((float*)data)[6];
+			// if((data[0]&~0x11) != 0)
+			// {
+			// 	test.Print(data, data_end);
+			// 	std::cout << "AST0 has nonstandard flags\n";
+			// }
+			data += 7;
+		} else if (!memcmp(buf, "ASMX", 4)) {
+        // AS->maxSpeedX = data[0];
+			data++;
+		} else if (!memcmp(buf, "ASAA", 4)) {
+			// AS->hitsNumber = data[0];
+
+			data++;
+		} else if (!memcmp(buf, "ASYS", 4)) {
+			// AS->invincibility = data[0];
+			// if(data[0] > 4)
+			// {
+			// 	test.Print(data, data_end);
+			// 	std::cout <<"\tUnknown ASYS value: " << data[0] <<"\n";
+			// }
+			data++;
+		} else if (!memcmp(buf, "ASF", 3)) {
+			// char t = ((char *)buf)[3];
+			// if(t != '0' && t !='1')
+			// {
+			// 	test.Print(data, data_end);
+			// 	std::cout <<"\tUnknown ASF suffix" << t <<"\n";
+			// }
+			// else
+			// {
+			// 	AS->statusFlags[t-'0'] = data[0];
+			// }
+			data++;
 		} else if (!memcmp(buf, "ASED", 4)) {
 			break;
 		}
@@ -197,7 +323,7 @@ static unsigned int *fd_frame_IF_load(unsigned int *data, const unsigned int *da
 
 	return data;
 }
-
+/*
 static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *data_end,
 				MBTL_Frame *frame) {
 	frame->AF.active = 1;
@@ -219,17 +345,30 @@ static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *da
 	frame->AF.zoom_x = 1.0;
 	frame->AF.zoom_y = 1.0;
 	frame->AF.AFJP = -1;
+  int spriteLayer = -1;
+  int layerId = -1;
 
 	while (data < data_end) {
 		unsigned int *buf = data;
 		++data;
 
-		if (!memcmp(buf, "AFGP", 4)) {
+		if (!memcmp(buf, "AFGP", 4)) { // Deprecated?
 			int *dt = (int *)data;
 			frame->AF.frame = dt[1];
 			frame->AF.frame_unk = dt[0];
 			data += 2;
-		} else if (!memcmp(buf, "AFOF", 4)) {
+    } else if (!memcmp(buf, "AFGX", 4)) {
+      int *dt = (int *)data;
+      //There can be multiple of these. Not gonna bother yet.
+			layerId = dt[0];
+			if(frame->AF.frame == -1 && dt[1] != 1)
+      {
+        frame->AF.frame = dt[2];
+        //frame->AF.usePat = dt[1];
+        spriteLayer = dt[0];
+      }
+			data += 3;
+		} else if (!memcmp(buf, "AFOF", 4) && layerId == spriteLayer) {
 			int *dt = (int *)data;
 			frame->AF.offset_y = dt[1];
 			frame->AF.offset_x = dt[0];
@@ -311,6 +450,162 @@ static unsigned int *fd_frame_AF_load(unsigned int *data, const unsigned int *da
 
 	return data;
 }
+*/
+
+unsigned int *fd_frame_AF_load2(unsigned int *data, const unsigned int *data_end, MBTL_Frame *frame)
+{
+	Layer *currentLayer = nullptr;
+	frame->AF.active = 1;
+	while (data < data_end) {
+		unsigned int *buf = data;
+		++data;
+		
+		if (!memcmp(buf, "AFGP", 4)) { //Melty graphics
+			//assert(0 && "AFGP");
+			/* int *dt = (int *)data;
+			frame->AF.spriteId = dt[1];
+			frame->AF.usePat = dt[0]; */
+			data += 2;
+		} else if (!memcmp(buf, "AFGX", 4)) { //UNI gfx
+			//There can be multiple of these.
+			int *dt = (int *)data;
+			////assert(frame->AF.layers.size() == dt[0]);
+			frame->AF.layers.push_back({});
+			currentLayer = &frame->AF.layers.back();		
+			currentLayer->spriteId = dt[2];
+			currentLayer->usePat = dt[1];
+			////assert(data[1] < 2);
+			data += 3;
+		} else if (!memcmp(buf, "AFOF", 4)) {
+			int *dt = (int *)data;
+			currentLayer->offset_y = dt[1];
+			currentLayer->offset_x = dt[0];
+			data += 2;
+		} else if (!memcmp(buf, "AFPL", 4)) {
+			currentLayer->priority = data[0];
+			data += 1;
+		} else if (!memcmp(buf, "AFAL", 4)) {
+			currentLayer->blend_mode = data[0];
+			currentLayer->rgba[3] = ((float)data[1])/255.f;
+			//assert(data[0] >= 1 || data[0] <= 3 );
+			data += 2;
+		} else if (!memcmp(buf, "AFRG", 4)) {
+			currentLayer->rgba[0] = ((float)data[0])/255.f;
+			currentLayer->rgba[1] = ((float)data[1])/255.f;
+			currentLayer->rgba[2] = ((float)data[2])/255.f;
+			data += 3;
+		} else if (!memcmp(buf, "AFAZ", 4)) {
+			currentLayer->rotation[2] = *(float *)data;
+			++data;
+		} else if (!memcmp(buf, "AFAY", 4)) {
+			currentLayer->rotation[1] = *(float *)data;
+			++data;
+		} else if (!memcmp(buf, "AFAX", 4)) {
+			currentLayer->rotation[0] = *(float *)data;
+			++data;
+		} else if (!memcmp(buf, "AFZM", 4)) {
+			currentLayer->scale[0] = ((float *)data)[0];
+			currentLayer->scale[1] = ((float *)data)[1];
+			data += 2;
+		
+		} else if (!memcmp(buf, "AFD", 3)) {
+			char t = ((char *)buf)[3];
+			if (t >= '0' && t <= '9') {
+				frame->AF.duration = t - '0';
+			} else if (t == 'L') {
+				frame->AF.duration = data[0];
+				++data;
+			}
+		} else if (!memcmp(buf, "AFY", 3)) { //Probably deprecated
+			// 7/8/9/X/1/2/3 -> 7/8/9/10/11/12/13
+			// Overrides AFOF
+			currentLayer->offset_x = 0;
+			char t = ((char *)buf)[3];
+			if (t >= '0' && t <= '9') {
+				int v = (t - '0');
+				if (v < 4) {
+					v += 10;
+				}
+				currentLayer->offset_y = v;
+			} else if (t == 'X') {
+				currentLayer->offset_y = 10;
+			}
+		} else if (!memcmp(buf, "AFF", 3)) {
+			char t = ((char *)buf)[3];
+			if (t >= '1' && t <= '2') {
+				//Only values 1 and 2 are used.
+				frame->AF.aniType = t - '0';
+				//assert(t - '0' <= 2);
+			} else if (t == 'L') {
+				frame->AF.aniType = data[0];
+				//assert(data[0] == 3);
+				++data;
+			} else if (t == 'E') {
+				frame->AF.aniFlag = data[0];
+				//assert(data[0] < 0x10); //Only lower four?
+				++data;
+			}
+			else {
+          //test.Print(data, data_end);
+          //std::cout <<"\tAFF uses uknown value: " << t <<"\n";
+			}
+		} else if (!memcmp(buf, "AFJH", 4)) {
+			frame->AF.afjh = data[0];
+			//assert(data[0] == 1);
+			data += 1;
+
+		} else if (!memcmp(buf, "AFJP", 4)) {
+			frame->AF.jump = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFHK", 4)) {
+			frame->AF.interpolationType = data[0];
+			//assert(data[0] <= 5);
+			++data;
+		} else if (!memcmp(buf, "AFPA", 4)) {
+			memcpy(frame->AF.param, data, sizeof(char)*4);
+			++data;
+		} else if (!memcmp(buf, "AFPR", 4)) {
+			frame->AF.priority = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFCT", 4)) {
+			frame->AF.loopCount = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFLP", 4)) {
+			frame->AF.loopEnd = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFJC", 4)) {
+			frame->AF.landJump = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFTN", 4)) {
+			//Overrides rotation
+			//assert(0); //Deprecated?
+			currentLayer->rotation[0] = data[0] ? 0.5f : 0.f;
+			currentLayer->rotation[1] = data[1] ? 0.5f : 0.f;
+			data += 2;
+		} else if (!memcmp(buf, "AFRT", 4)) {
+			//Some fucked up interaction with rotation and scale order.
+			frame->AF.AFRT = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFID", 4)) {
+			frame->AF.frameId = data[0];
+			++data;
+		} else if (!memcmp(buf, "AFED", 4)) {
+			break;
+		} else {
+			char tag[5]{};
+			memcpy(tag,buf,4);
+			//test.Print(data, data_end);
+			//std::cout <<"\tUnknown AF tag: " << tag <<"\n";
+		}
+		//Unhandled: None, unless they're not in vanilla melty files.
+	}
+
+	return data;
+}
+
+
+
+
 
 static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_end,
 				MBTL_Frame *frame, TempInfo *info) {
@@ -381,7 +676,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 			}
 		} else if (!memcmp(buf, "AFST", 4)) {
 			// start render frame block
-			data = fd_frame_AF_load(data, data_end, frame);
+			data = fd_frame_AF_load2(data, data_end, frame);
 		} else if (!memcmp(buf, "EFST", 4)) {
 			// start effect block
 			int n = data[0];
@@ -418,7 +713,7 @@ static unsigned int *fd_frame_load(unsigned int *data, const unsigned int *data_
 }
 
 static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *data_end,
-				MBTL_Sequence *seq) {
+                                      MBTL_Sequence *seq, int seq_id) {
 	TempInfo temp_info;
 	bool initialized = 0;
 	unsigned int frame_no = 0;
@@ -435,7 +730,14 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 		++data;
 
 		if (!memcmp(buf, "PTCN", 4)) {
-			data = (unsigned int *)(((unsigned char *)data)+5);
+      unsigned int len = data[0];
+			data += 1;
+
+			char str[65];
+			memcpy(str, data, len);
+			str[len] = '\0';
+			seq->name = str;
+			data = (unsigned int *)(((unsigned char *)data)+len);
 		} else if (!memcmp(buf, "PSTS", 4)) {
 			++data;
 		} else if (!memcmp(buf, "PLVL", 4)) {
@@ -550,7 +852,25 @@ static unsigned int *fd_sequence_load(unsigned int *data, const unsigned int *da
 			}
 		} else if (!memcmp(buf, "PEND", 4)) {
 			break;
-		}
+		} else if (!memcmp(buf, "PUPS", 4)) {
+        // ?????
+        ++data;
+		} else {
+      char tag[9]{};
+      memcpy(tag,buf,8);
+      FILE *fp2 = fopen ("error.txt", "w");
+      fprintf( fp2, "%d seq Unknown Pattern level tag: %d %d %d %d %d %d %d %d", seq_id,
+               tag[0],
+               tag[1],
+               tag[2],
+               tag[3],
+               tag[4],
+               tag[5],
+               tag[6],
+               tag[7]
+               );
+      fclose( fp2 );
+    }
 	}
 
 	if (initialized && seq->initialized && frame_no < seq->nframes) {
@@ -588,8 +908,7 @@ static unsigned int *fd_main_load(unsigned int *data, const unsigned int *data_e
 						seq->is_move = 0;
 						seq->move_meter = 0;
 					}
-
-					data = fd_sequence_load(data, data_end, seq);
+					data = fd_sequence_load(data, data_end, seq, seq_id);
 				}
 			} else {
 				++data;
@@ -602,13 +921,13 @@ static unsigned int *fd_main_load(unsigned int *data, const unsigned int *data_e
 	return data;
 }
 
-bool MBTL_FrameData::load(MBTL_Pack *pack, const char *filename) {
+bool MBTL_FrameData::load(MBTL_Pack *pack, const char *filename, int bsize, int offset) {
 	// allow loading over existing data
 
 	char *data;
 	unsigned int size;
 
-	if (!pack->read_file(filename, &data, &size)) {
+	if (!pack->read_file(filename, &data, &size, bsize, offset)) {
 		return 0;
 	}
 
@@ -681,7 +1000,7 @@ static char *split_line(char **data) {
 	return start;
 }
 
-bool MBTL_FrameData::load_move_list(MBTL_Pack *pack, const char *filename) {
+bool MBTL_FrameData::load_move_list(MBTL_Pack *pack, const char *filename, int bsize, int offset) {
 	if (!m_loaded) {
 		return 0;
 	}
@@ -689,7 +1008,7 @@ bool MBTL_FrameData::load_move_list(MBTL_Pack *pack, const char *filename) {
 	char *data;
 	unsigned int size;
 
-	if (!pack->read_file(filename, &data, &size)) {
+	if (!pack->read_file(filename, &data, &size, bsize, offset)) {
 		return 0;
 	}
 

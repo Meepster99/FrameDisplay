@@ -368,7 +368,7 @@ void MBTL_CG::build_image_table() {
 	}
 }
 
-bool MBTL_CG::load(MBTL_Pack *pack, const char *name) {
+bool MBTL_CG::load(MBTL_Pack *pack, const char *name, int bsize, int offset) {
 	if (m_loaded) {
 		return 0;
 	}
@@ -376,7 +376,7 @@ bool MBTL_CG::load(MBTL_Pack *pack, const char *name) {
 	char *data;
 	unsigned int size;
 
-	if (!pack->read_file(name, &data, &size)) {
+	if (!pack->read_file(name, &data, &size, bsize, offset)) {
 		return 0;
 	}
 

@@ -10,38 +10,19 @@
 // decryption function. Only applies to first 4096 bytes of data.
 void decrapt(unsigned char *data, unsigned int size,
 		unsigned int xorkey, unsigned int xormod) {
-	union {
-		unsigned int key;
-		struct {
-			unsigned char a;
-			unsigned char b;
-			unsigned char c;
-			unsigned char d;
-		} b;
-	} key_a;
-	unsigned int key_b;
+    data[0] ^= 0xA5;
+    data[1] ^= 0x18;
 
-	key_a.key = xorkey;
+    uint32_t A = data[0] ^ 0xAC;
+    uint32_t B = data[0] ^ 0xAC ^ data[1] ^ 0x76381;
 
-	key_b = xormod & 0xff;
-	if (key_b == 0) {
-		key_b = 1;
-	}
-
-	if (size > 4096) {
-		size = 4096;
-	}
-
-	unsigned int *p = (unsigned int *)data;
-	size = (size + 3) / 4;
-	for (unsigned int i = 0; i < size; ++i) {
-		*p++ ^= key_a.key;
-
-		key_a.b.a += key_b;
-		key_a.b.b += key_b;
-		key_a.b.c += key_b;
-		key_a.b.d += key_b;
-	}
+    if (size > 2 )
+    {
+        for (uint32_t i = size - 1; i > 1; i--) {
+            data[i] ^= ENTRY_KEY[A ^ B & 0x3FF];
+            B++;
+        }
+    }
 }
 
 bool MBTL_Pack::open_pack(const char *filename) {
@@ -56,6 +37,7 @@ bool MBTL_Pack::open_pack(const char *filename) {
 		return 0;
 	}
 
+  /*
 	struct header_t {
 		unsigned char string[16];
 		unsigned int flag;
@@ -112,12 +94,13 @@ bool MBTL_Pack::open_pack(const char *filename) {
 	}
 
 	// finish up!
-
 	m_data_start = header.table_size;
 	m_xor_key = header.xor_key;
 
 	m_folder_index = folder_index;
 	m_file_index = file_index;
+
+  */
 	m_file = f;
 
 	return 1;
@@ -144,8 +127,10 @@ void MBTL_Pack::close_pack() {
 	m_file_count = 0;
 }
 
-bool MBTL_Pack::read_file(const char *filename, char **dest, unsigned int *dsize) {
+bool MBTL_Pack::read_file(const char *filename, char **dest, unsigned int *dsize, int bsize, int offset) {
   // TODO: actually read from pack
+
+    /*
   FILE *f = fopen(filename, "rb");
   fseek(f, 0, SEEK_END);
   long fsize = ftell(f);
@@ -154,11 +139,36 @@ bool MBTL_Pack::read_file(const char *filename, char **dest, unsigned int *dsize
   }
   *dsize = abs( fsize );
   fseek(f, 0, SEEK_SET);
-  char *string = (char *)malloc(fsize + 1);
+  unsigned char *string = new unsigned char[fsize + 3];
   fread(string, fsize, 1, f);
   fclose(f);
   string[fsize] = 0;
   *dest = (char *)string;
+  //return 1;
+
+  //FILE *fp2 = fopen ("pack.txt", "wb");
+  //fprintf( fp2, "%s: %d %d\n", filename, bsize, offset );
+  //fwrite ( data , sizeof(char), 10, fp2);
+  */
+
+  unsigned char *data = new unsigned char[bsize + 3];
+	fseek(m_file, offset, SEEK_SET);
+
+  int count = fread(data, bsize, 1, m_file);
+
+  //fprintf( fp2, "%s: %d\n", filename, count );
+  //fclose( fp2 );
+  if (count >= 1) {
+      decrapt(data, bsize, m_xor_key, 0x03);
+
+      data[bsize] = '\0';
+
+      *dest = (char *)data;
+      *dsize = bsize;
+
+      return 1;
+  }
+
   /*
 	// hacky, but it's in the middle so it doesn't matter.
 	unsigned int n = m_folder_index[m_data_folder_id].file_start_id;
