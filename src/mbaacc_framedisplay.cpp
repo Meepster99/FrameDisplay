@@ -464,20 +464,20 @@ const char *MBAACC_FrameDisplay::get_current_sprite_filename() {
 	return m_character_data.get_current_sprite_filename(m_sequence, m_frame);
 }
 
-bool MBAACC_FrameDisplay::save_current_sprite(const char *filename) {
+bool MBAACC_FrameDisplay::save_current_sprite(const char *filename, RenderProperties* properties) {
 	if (!m_initialized) {
 		return 0;
 	}
 	
-	return m_character_data.save_current_sprite(filename, m_sequence, m_frame);
+	return m_character_data.save_current_sprite(filename, m_sequence, m_frame, properties);
 }
 
-int MBAACC_FrameDisplay::save_all_character_sprites(const char *directory) {
+int MBAACC_FrameDisplay::save_all_character_sprites(const char *directory, RenderProperties* properties) {
 	if (!m_initialized) {
 		return 0;
 	}
 	
-	return m_character_data.save_all_character_sprites(directory);
+	return m_character_data.save_all_character_sprites(directory, properties);
 }
 
 MBAACC_FrameDisplay::MBAACC_FrameDisplay() {

@@ -1,3 +1,5 @@
 *.o
 *.swp
 *.exe
+*.txt
+*.png

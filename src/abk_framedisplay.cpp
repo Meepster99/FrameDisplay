@@ -362,7 +362,7 @@ const char *ABK_FrameDisplay::get_current_sprite_filename() {
 	return m_imagedata.get_image_filename(ri->sprite);
 }
 
-bool ABK_FrameDisplay::save_current_sprite(const char *filename) {
+bool ABK_FrameDisplay::save_current_sprite(const char *filename, RenderProperties* properties) {
 	ABK_Frame *frame = m_framedata.get_frame(m_sequence, m_frame);
 	if (!frame) {
 		return 0;
@@ -387,7 +387,7 @@ bool ABK_FrameDisplay::save_current_sprite(const char *filename) {
 	return retval;
 }
 
-int ABK_FrameDisplay::save_all_character_sprites(const char *directory) {
+int ABK_FrameDisplay::save_all_character_sprites(const char *directory, RenderProperties* properties) {
 	if (!m_initialized) {
 		return 0;
 	}

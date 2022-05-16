@@ -23,6 +23,7 @@ struct MBTL_Character_Info {
   int		cg_size;
   int		cg_offset;
   */
+  // CG, HA6, PAL, HA6_9
   int sizes[4];
   int offsets[4];
 };
@@ -399,7 +400,7 @@ const char *MBTL_FrameDisplay::get_current_sprite_filename() {
 	return m_character_data.get_current_sprite_filename(m_sequence, m_frame);
 }
 
-bool MBTL_FrameDisplay::save_current_sprite(const char *filename) {
+bool MBTL_FrameDisplay::save_current_sprite(const char *filename, RenderProperties* properties) {
 	if (!m_initialized) {
 		return 0;
 	}
@@ -407,7 +408,7 @@ bool MBTL_FrameDisplay::save_current_sprite(const char *filename) {
 	return m_character_data.save_current_sprite(filename, m_sequence, m_frame);
 }
 
-int MBTL_FrameDisplay::save_all_character_sprites(const char *directory) {
+int MBTL_FrameDisplay::save_all_character_sprites(const char *directory, RenderProperties* properties) {
 	if (!m_initialized) {
 		return 0;
 	}

@@ -404,8 +404,8 @@ public:
 	virtual void	command(FrameDisplayCommand command, void *param);
 
 	virtual const char *get_current_sprite_filename();
-	virtual bool	save_current_sprite(const char *filename);
-	virtual int	save_all_character_sprites(const char *directory);
+  virtual bool save_current_sprite(const char *filename, RenderProperties* properties=NULL);
+  virtual int	save_all_character_sprites(const char *directory, RenderProperties* properties=NULL);
 
 	virtual bool	init();
 	virtual bool	init(const char *filename);

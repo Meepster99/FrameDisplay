@@ -555,7 +555,7 @@ const char *MBAA_FrameDisplay::get_current_sprite_filename() {
 	return m_character_data.get_current_sprite_filename(m_sequence, m_frame);
 }
 
-bool MBAA_FrameDisplay::save_current_sprite(const char *filename) {
+bool MBAA_FrameDisplay::save_current_sprite(const char *filename, RenderProperties* properties) {
 	if (!m_initialized) {
 		return 0;
 	}
@@ -563,7 +563,7 @@ bool MBAA_FrameDisplay::save_current_sprite(const char *filename) {
 	return m_character_data.save_current_sprite(filename, m_sequence, m_frame);
 }
 
-int MBAA_FrameDisplay::save_all_character_sprites(const char *directory) {
+int MBAA_FrameDisplay::save_all_character_sprites(const char *directory, RenderProperties* properties) {
 	if (!m_initialized) {
 		return 0;
 	}

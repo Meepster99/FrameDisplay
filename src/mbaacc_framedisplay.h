@@ -6,6 +6,7 @@
 #include <map>
 
 #include "framedisplay.h"
+#include "render.h"
 
 #include "texture.h"
 
@@ -15,6 +16,7 @@
 
 struct MBAACC_CG_Image;
 struct MBAACC_CG_Alignment;
+struct MBAACC_Frame;
 
 class MBAACC_CG {
 protected:
@@ -70,6 +72,11 @@ public:
 	Texture			*draw_texture(unsigned int n,
 					unsigned int *palette, bool to_pow2,
 					bool draw_8bpp = 0);
+  Texture	*draw_texture_with_boxes(unsigned int n,
+                                   unsigned int *palette, bool to_pow2,
+                                   RenderProperties* properties,
+                                   MBAACC_Frame* frame);
+    void draw_boxes(BoxType box_type, rect_t *rects, int nrects, bool solid, unsigned char* pixels, int width, int height, MBAACC_Frame* frame);
 	
 	int			get_image_count();
 	
@@ -242,7 +249,7 @@ protected:
 	Texture		*m_texture;
 	int		m_last_sprite_id;
 	
-	bool		do_sprite_save(int id, const char *filename);
+  bool do_sprite_save(int id, const char *filename, RenderProperties* properties, int seq_id=-1, int fr_id=-1);
 	
 	MBAACC_Frame *	get_frame(int seq_id, int fr_id);
 	
@@ -276,8 +283,8 @@ public:
 	int		find_frame(int seq_id, int fr_id);
 	
 	const char *	get_current_sprite_filename(int seq_id, int fr_id);
-	bool		save_current_sprite(const char *filename, int seq_id, int fr_id);
-	int		save_all_character_sprites(const char *directory);
+  bool		save_current_sprite(const char *filename, int seq_id, int fr_id, RenderProperties* properties=NULL);
+  int		save_all_character_sprites(const char *directory, RenderProperties* properties=NULL);
 	
 	void		free_frame_data();
 	void		free_graphics();
@@ -324,8 +331,8 @@ public:
 	virtual void	command(FrameDisplayCommand command, void *param);
 	
 	virtual const char *get_current_sprite_filename();
-	virtual bool	save_current_sprite(const char *filename);
-	virtual int	save_all_character_sprites(const char *directory);
+  virtual bool	save_current_sprite(const char *filename, RenderProperties* properties);
+  virtual int	save_all_character_sprites(const char *directory, RenderProperties* properties);
 	
 	virtual bool	init();
 	virtual bool	init(const char *filename);

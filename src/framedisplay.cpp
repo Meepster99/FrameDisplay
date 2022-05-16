@@ -57,11 +57,11 @@ const char *FrameDisplay::get_current_sprite_filename() {
 	return 0;
 }
 
-bool FrameDisplay::save_current_sprite(const char *filename) {
+bool FrameDisplay::save_current_sprite(const char *filename, RenderProperties* properties) {
 	return 0;
 }
 
-int FrameDisplay::save_all_character_sprites(const char *directory) {
+int FrameDisplay::save_all_character_sprites(const char *directory, RenderProperties* properties) {
 	return 0;
 }
 

@@ -71,6 +71,7 @@
 #define IDM_CLONE_FLIP_CLONE		4005
 #define IDM_MISC_SAVE_SPRITE		5001
 #define IDM_MISC_SAVE_ALL_SPRITES	5002
+#define IDM_USE_VIEW_OPTIONS 5003
 
 static FrameDisplay *framedisplay = 0;
 static HINSTANCE hAppInst = 0;
@@ -90,7 +91,7 @@ static HGLRC hGLRC = 0;
 
 static const TCHAR *class_name = "FrameDisplay2";
 static const TCHAR *opengl_class_name = "FrameDisplay2OpenGL";
-static const TCHAR *program_name = "FrameDisplay v2.4";
+static const TCHAR *program_name = "FrameDisplay v2.4.1";
 
 static int toolbar_height = 0;
 
@@ -141,6 +142,7 @@ Toggle toggle_view_display_hit_box(1, &hMenuView, IDM_VIEW_DISPLAY_HIT_BOX);
 Toggle toggle_view_display_attack_box(1, &hMenuView, IDM_VIEW_DISPLAY_ATTACK_BOX);
 Toggle toggle_view_display_clash_box(1, &hMenuView, IDM_VIEW_DISPLAY_CLASH_BOX);
 Toggle toggle_frame_detailed_properties(0, &hMenuFrame, IDM_FRAME_DETAILED_PROPERTIES);
+Toggle toggle_use_view_options(1, &hMenuMisc, IDM_USE_VIEW_OPTIONS);
 
 // ****************************************************** OPENGL CODE
 static int window_height = 480;
@@ -223,6 +225,7 @@ static void draw_opengl() {
 	properties.display_hit_box = toggle_view_display_hit_box.get();
 	properties.display_attack_box = toggle_view_display_attack_box.get();
 	properties.display_clash_box = toggle_view_display_clash_box.get();
+	properties.use_view_options = toggle_use_view_options.get();
 	
 	if (clone_list.begin() != clone_list.end()) {
 		RenderProperties clone_props;
@@ -777,6 +780,7 @@ static void free_framedisplay() {
 
 	EnableMenuItem(hMenuMisc, IDM_MISC_SAVE_SPRITE, MF_BYCOMMAND|MF_GRAYED);
 	EnableMenuItem(hMenuMisc, IDM_MISC_SAVE_ALL_SPRITES, MF_BYCOMMAND|MF_GRAYED);
+	EnableMenuItem(hMenuView, IDM_USE_VIEW_OPTIONS, MF_BYCOMMAND|MF_GRAYED);
 
 	EnableMenuItem(hMenuClone, IDM_CLONE_CREATE_CLONE, MF_BYCOMMAND|MF_GRAYED);
 	
@@ -820,6 +824,7 @@ static void set_framedisplay(FrameDisplay *fdisp) {
 
 	EnableMenuItem(hMenuMisc, IDM_MISC_SAVE_SPRITE, MF_BYCOMMAND|MF_ENABLED);
 	EnableMenuItem(hMenuMisc, IDM_MISC_SAVE_ALL_SPRITES, MF_BYCOMMAND|MF_ENABLED);
+	EnableMenuItem(hMenuView, IDM_USE_VIEW_OPTIONS, MF_BYCOMMAND|MF_ENABLED);
 	
 	int i = 0;
 	while (1) {
@@ -953,9 +958,18 @@ static void callback_save_sprite(const char *filename) {
 	if (!framedisplay || !filename) {
 		return;
 	}
-	
-	bool saved = framedisplay->save_current_sprite(filename);
-	
+
+	RenderProperties properties;
+	properties.display_sprite = toggle_view_display_sprite.get();
+	properties.display_solid_boxes = toggle_view_display_solid_boxes.get();
+	properties.display_collision_box = toggle_view_display_collision_box.get();
+	properties.display_hit_box = toggle_view_display_hit_box.get();
+	properties.display_attack_box = toggle_view_display_attack_box.get();
+	properties.display_clash_box = toggle_view_display_clash_box.get();
+	properties.use_view_options = toggle_use_view_options.get();
+
+	bool saved = framedisplay->save_current_sprite(filename, &properties);
+
 	if (!saved) {
 		MessageBox(hWnd, "Could not save image.", "Error", MB_OK);
 	}
@@ -982,7 +996,16 @@ static void do_save_file(const char *filename, const char *formats, file_callbac
 static void callback_save_all_sprites(const char *folder) {
 	int count;
 	
-	count = framedisplay->save_all_character_sprites(folder);
+	RenderProperties properties;
+	properties.display_sprite = toggle_view_display_sprite.get();
+	properties.display_solid_boxes = toggle_view_display_solid_boxes.get();
+	properties.display_collision_box = toggle_view_display_collision_box.get();
+	properties.display_hit_box = toggle_view_display_hit_box.get();
+	properties.display_attack_box = toggle_view_display_attack_box.get();
+	properties.display_clash_box = toggle_view_display_clash_box.get();
+	properties.use_view_options = toggle_use_view_options.get();
+
+	count = framedisplay->save_all_character_sprites(folder, &properties);
 	
 	char str[MAX_PATH + 80];
 	sprintf(str, "Saved %d images to destination folder\n%s", count, folder);
@@ -1419,6 +1442,9 @@ static void callback_command(HWND hWnd, int id, HWND src, UINT codeNotify) {
 			do_open_folder("Save all sprites to...", callback_save_all_sprites);
 		}
 		break;
+	case IDM_USE_VIEW_OPTIONS:
+    toggle_use_view_options.toggle();
+    break;
 	}
 }
 
@@ -1525,6 +1551,7 @@ static void init_menu() {
 	
 	AppendMenu(hMenu, MF_STRING, IDM_MISC_SAVE_SPRITE, "Save this sprite...");
 	AppendMenu(hMenu, MF_STRING, IDM_MISC_SAVE_ALL_SPRITES, "Save all this character's sprites...");
+	AppendMenu(hMenu, MF_STRING | MF_CHECKED, IDM_USE_VIEW_OPTIONS, "Save sprites with boxes");
 	
 	hMenuMisc = hMenu;
 	
@@ -1570,6 +1597,7 @@ static void init_menu() {
 	toggle_view_display_attack_box.update();
 	toggle_view_display_clash_box.update();
 	toggle_frame_detailed_properties.update();
+	toggle_use_view_options.update();
 }
 
 // ****************************************************** WINDOW LAYOUT CODE

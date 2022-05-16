@@ -31,6 +31,9 @@ struct RenderProperties {
 	bool		display_hit_box;
 	bool		display_attack_box;
 	bool		display_clash_box;
+
+  bool		use_view_options;
+  bool		display_bg;
 };
 
 class FrameDisplay {
@@ -69,8 +72,8 @@ public:
 	virtual void	command(FrameDisplayCommand command, void *param);
 	
 	virtual const char *get_current_sprite_filename();
-	virtual bool	save_current_sprite(const char *filename);
-	virtual int	save_all_character_sprites(const char *directory);
+  virtual bool save_current_sprite(const char *filename, RenderProperties* properties);
+  virtual int	save_all_character_sprites(const char *directory, RenderProperties* properties);
 	
 	virtual bool	init();
 	virtual bool	init(const char *filename);

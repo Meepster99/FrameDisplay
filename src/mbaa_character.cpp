@@ -101,7 +101,7 @@ void MBAA_Character::render(const RenderProperties *properties, int seq_id, int 
 	// render hitboxes
 	rect_t rects[32];
 	int nrects;
-	
+
 	if (properties->display_hit_box) {
 		nrects = 0;
 		for (int i = 1; i < 11; ++i) {
@@ -116,17 +116,17 @@ void MBAA_Character::render(const RenderProperties *properties, int seq_id, int 
 			render_boxes(BOX_HIT, rects, nrects, properties->display_solid_boxes);
 		}
 	}
-	
+
 	// render damage boxes
 	if (properties->display_attack_box) {
-		nrects = 0;
-		for (int i = 25; i < 33; ++i) {
-			if (frame->hitboxes[i]) {
-				copy_hitbox_to_rect(&rects[nrects], frame->hitboxes[i]);
-				
-				++nrects;
-			}
-		}
+      nrects = 0;
+      for (int i = 25; i < 33; ++i) {
+          if (frame->hitboxes[i]) {
+              copy_hitbox_to_rect(&rects[nrects], frame->hitboxes[i]);
+
+              ++nrects;
+          }
+      }
 	
 		if (nrects > 0) {
 			render_boxes(BOX_ATTACK, rects, nrects, properties->display_solid_boxes);
@@ -650,7 +650,7 @@ const char *MBAA_Character::get_current_sprite_filename(int seq_id, int fr_id) {
 	return 0;
 }
 
-bool MBAA_Character::do_sprite_save(int id, const char *filename) {
+bool MBAA_Character::do_sprite_save(int id, const char *filename, RenderProperties* properties) {
 	Texture *texture;
 	
 	texture = m_cg2.draw_texture(id, &m_arx, m_palettes[m_active_palette], 1, 1);
@@ -666,7 +666,7 @@ bool MBAA_Character::do_sprite_save(int id, const char *filename) {
 	return retval;
 }
 
-bool MBAA_Character::save_current_sprite(const char *filename, int seq_id, int fr_id) {
+bool MBAA_Character::save_current_sprite(const char *filename, int seq_id, int fr_id, RenderProperties* properties) {
 	if (!m_loaded) {
 		return 0;
 	}
@@ -678,13 +678,13 @@ bool MBAA_Character::save_current_sprite(const char *filename, int seq_id, int f
 	}
 
 	if (frame->AF.active && frame->AF.frame >= 0) {
-		return do_sprite_save(frame->AF.frame, filename);
+    return do_sprite_save(frame->AF.frame, filename, properties);
 	}
 	
 	return 0;
 }
 
-int MBAA_Character::save_all_character_sprites(const char *directory) {
+int MBAA_Character::save_all_character_sprites(const char *directory, RenderProperties* properties) {
 	if (!m_loaded) {
 		return 0;
 	}
@@ -708,7 +708,7 @@ int MBAA_Character::save_all_character_sprites(const char *directory) {
 				strcat(filename, ".png");
 			}
 			
-			count += do_sprite_save(i, filename) ? 1 : 0;
+			count += do_sprite_save(i, filename, properties) ? 1 : 0;
 		}
 	}
 	

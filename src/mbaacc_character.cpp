@@ -637,11 +637,15 @@ const char *MBAACC_Character::get_current_sprite_filename(int seq_id, int fr_id)
 	return 0;
 }
 
-bool MBAACC_Character::do_sprite_save(int id, const char *filename) {
+bool MBAACC_Character::do_sprite_save(int id, const char *filename, RenderProperties* properties, int seq_id, int fr_id) {
 	Texture *texture;
 	
-	texture = m_cg.draw_texture(id, m_palettes[m_active_palette], 1, 1);
-	
+  if (properties->use_view_options && seq_id >= 0 && fr_id >= 0) {
+      MBAACC_Frame *frame = get_frame(seq_id, fr_id);
+      texture = m_cg.draw_texture_with_boxes(id, m_palettes[m_active_palette], 1, properties, frame);
+  } else {
+      texture = m_cg.draw_texture(id, m_palettes[m_active_palette], 1, 1);
+  }
 	bool retval = 0;
 	
 	if (texture) {
@@ -653,7 +657,7 @@ bool MBAACC_Character::do_sprite_save(int id, const char *filename) {
 	return retval;
 }
 
-bool MBAACC_Character::save_current_sprite(const char *filename, int seq_id, int fr_id) {
+bool MBAACC_Character::save_current_sprite(const char *filename, int seq_id, int fr_id, RenderProperties* properties) {
 	if (!m_loaded) {
 		return 0;
 	}
@@ -665,13 +669,13 @@ bool MBAACC_Character::save_current_sprite(const char *filename, int seq_id, int
 	}
 
 	if (frame->AF.active && frame->AF.frame >= 0) {
-		return do_sprite_save(frame->AF.frame, filename);
+    return do_sprite_save(frame->AF.frame, filename, properties, seq_id, fr_id);
 	}
 	
 	return 0;
 }
 
-int MBAACC_Character::save_all_character_sprites(const char *directory) {
+int MBAACC_Character::save_all_character_sprites(const char *directory, RenderProperties* properties) {
 	if (!m_loaded) {
 		return 0;
 	}
@@ -695,7 +699,7 @@ int MBAACC_Character::save_all_character_sprites(const char *directory) {
 				strcat(filename, ".png");
 			}
 			
-			count += do_sprite_save(i, filename) ? 1 : 0;
+			count += do_sprite_save(i, filename, properties) ? 1 : 0;
 		}
 	}
 	

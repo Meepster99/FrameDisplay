@@ -46,6 +46,7 @@ endif
 
 CXX = i686-w64-mingw32-g++ -m32
 
+CFLAGS_DEBUG = -s -g -Wall -Wno-narrowing -I"$(CURDIR)" -I"$(CURDIR)/../libpng" -I"$(CURDIR)/../libz" -I"$(CURDIR)/../SDL" -I$(OPENGL_HEADERS)
 CFLAGS = -s -O3 -Os -Wall -Wno-narrowing -I"$(CURDIR)" -I"$(CURDIR)/../libpng" -I"$(CURDIR)/../libz" -I"$(CURDIR)/../SDL" -I$(OPENGL_HEADERS)
 
 LIBS = -static -lmingw32 -lSDLmain -lSDL -lpng -lz -lopengl32 -lcomctl32 -lole32 -lwinmm -ldxguid

@@ -325,7 +325,7 @@ const char *Ougon_FrameDisplay::get_current_sprite_filename() {
 	return namebuf;
 }
 
-bool Ougon_FrameDisplay::save_current_sprite(const char *filename) {
+bool Ougon_FrameDisplay::save_current_sprite(const char *filename, RenderProperties* properties) {
 	Ougon_Frame *frame = m_framedata.get_frame(m_sequence, m_frame);
 	if (!frame) {
 		return 0;
@@ -343,7 +343,7 @@ bool Ougon_FrameDisplay::save_current_sprite(const char *filename) {
 	return retval;
 }
 
-int Ougon_FrameDisplay::save_all_character_sprites(const char *directory) {
+int Ougon_FrameDisplay::save_all_character_sprites(const char *directory, RenderProperties* properties) {
 	if (!m_initialized) {
 		return 0;
 	}

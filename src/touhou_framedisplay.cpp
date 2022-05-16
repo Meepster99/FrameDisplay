@@ -364,17 +364,17 @@ void Touhou_FrameDisplay::render(const RenderProperties *properties) {
 					} else {
 						m_texture->blend_mode(1);
 					}
-					
+
 					if (frame->type_2.angle) {
 						m_texture->rotate_z((float)frame->type_2.angle/360.0);
 					}
 				}
-				
+
 				m_texture->draw(-frame->header.x_offset, -frame->header.y_offset, 2);
 			}
 		}
 	}
-	
+
 	if (properties->display_collision_box) {
 		rect_t rects[40];
 		int n = frame->n_boxes_collision;
@@ -387,7 +387,7 @@ void Touhou_FrameDisplay::render(const RenderProperties *properties) {
 			rects[i].x2 = frame->boxes_collision[i].x2;
 			rects[i].y2 = frame->boxes_collision[i].y2;
 		}
-		
+
 		render_boxes(BOX_COLLISION, rects, n, properties->display_solid_boxes);
 	}
 
@@ -403,7 +403,7 @@ void Touhou_FrameDisplay::render(const RenderProperties *properties) {
 			rects[i].x2 = frame->boxes_hit[i].x2;
 			rects[i].y2 = frame->boxes_hit[i].y2;
 		}
-		
+
 		render_boxes(BOX_HIT, rects, n, properties->display_solid_boxes);
 	}
 	if (properties->display_attack_box) {
@@ -693,7 +693,7 @@ const char *Touhou_FrameDisplay::get_current_sprite_filename() {
 	return get_sprite_filename(frame->header.render_frame);
 }
 
-bool Touhou_FrameDisplay::save_current_sprite(const char *filename) {
+bool Touhou_FrameDisplay::save_current_sprite(const char *filename, RenderProperties* properties) {
 	if (!m_initialized) {
 		return 0;
 	}
@@ -718,7 +718,7 @@ bool Touhou_FrameDisplay::save_current_sprite(const char *filename) {
 	return retval;
 }
 
-int Touhou_FrameDisplay::save_all_character_sprites(const char *directory) {
+int Touhou_FrameDisplay::save_all_character_sprites(const char *directory, RenderProperties* properties) {
 	if (!m_initialized) {
 		return 0;
 	}
