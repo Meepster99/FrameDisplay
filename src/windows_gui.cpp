@@ -1612,7 +1612,7 @@ static HWND make_combobox(HWND root, int x, int w) {
 		(x * LOWORD(dwBaseUnits)) / 4,
 		(1 * HIWORD(dwBaseUnits)) / 8,
 		(w * LOWORD(dwBaseUnits)) / 4,
-		(50 * HIWORD(dwBaseUnits)) / 8,
+		(86 * HIWORD(dwBaseUnits)) / 8,
 		root, NULL, hAppInst, NULL);
 	
 	return hWndCombo;
