@@ -9,6 +9,7 @@
 #include "framedisplay.h"
 
 #include "texture.h"
+#include "render.h"
 
 #include "mbtl_pack.h"
 
@@ -16,6 +17,7 @@
 
 struct MBTL_CG_Image;
 struct MBTL_CG_Alignment;
+struct MBTL_Frame;
 
 class MBTL_CG {
 protected:
@@ -67,11 +69,14 @@ public:
 	void			free();
 
 	const char		*get_filename(unsigned int n);
-
-	Texture			*draw_texture(unsigned int n,
-					unsigned int *palette, bool to_pow2,
-					bool draw_8bpp = 0);
-
+    Texture	*draw_texture(unsigned int n,
+                          unsigned int *palette, bool to_pow2,
+                          bool draw_8bpp = 0);
+    Texture	*draw_texture_with_boxes(unsigned int n,
+                                     unsigned int *palette, bool to_pow2,
+                                     RenderProperties* properties,
+                                     MBTL_Frame* frame);
+    void draw_boxes(BoxType box_type, rect_t *rects, int nrects, bool solid, unsigned char* pixels, int width, int height, MBTL_Frame* frame);
 	int			get_image_count();
 
 				MBTL_CG();
@@ -321,7 +326,7 @@ protected:
   std::vector<int> m_textures_y;
 	int		m_last_sprite_id;
 
-	bool		do_sprite_save(int id, const char *filename);
+    bool do_sprite_save(int id, const char *filename, RenderProperties* properties=NULL, MBTL_Frame* frame=NULL);
 
 	MBTL_Frame *	get_frame(int seq_id, int fr_id);
 
@@ -356,7 +361,7 @@ public:
 	int		find_frame(int seq_id, int fr_id);
 
 	const char *	get_current_sprite_filename(int seq_id, int fr_id);
-	bool		save_current_sprite(const char *filename, int seq_id, int fr_id);
+    bool		save_current_sprite(const char *filename, int seq_id, int fr_id, RenderProperties* properties=NULL);
 	int		save_all_character_sprites(const char *directory);
 
 	void		free_frame_data();

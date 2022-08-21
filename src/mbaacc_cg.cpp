@@ -389,6 +389,7 @@ Texture *MBAACC_CG::draw_texture_with_boxes(unsigned int n, unsigned int *palett
 	align = &m_align[image->align_start];
 	last_image = -32769;
 	for (unsigned int i = 0; i < image->align_len; ++i, ++align) {
+      // TODO: Multitexture images
       copy_cells(image, align, pixels, x1, y1, width, height, palette, is_8bpp);
 	}
 

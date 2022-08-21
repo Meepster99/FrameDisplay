@@ -59,7 +59,7 @@ clean:
 	rm -f $(ALL_OBJS) framedisplay framedisplay.exe
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -o $@ -c $<
+	$(CXX) $(CFLAGS_DEBUG) -o $@ -c $<
 
 framedisplay: $(SUBDIRS) $(LINUX_OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(LINUX_OBJS) $(LIBS)

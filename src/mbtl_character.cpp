@@ -925,10 +925,14 @@ const char *MBTL_Character::get_current_sprite_filename(int seq_id, int fr_id) {
 	return 0;
 }
 
-bool MBTL_Character::do_sprite_save(int id, const char *filename) {
+bool MBTL_Character::do_sprite_save(int id, const char *filename, RenderProperties* properties, MBTL_Frame* frame) {
 	Texture *texture;
 
-	texture = m_cg.draw_texture(id, m_palettes[m_active_palette], 1, 1);
+  if (properties->use_view_options && frame != 0) {
+      texture = m_cg.draw_texture_with_boxes(id, m_palettes[m_active_palette], 1, properties, frame);
+  } else {
+      texture = m_cg.draw_texture(id, m_palettes[m_active_palette], 1, 1);
+  }
 
 	bool retval = 0;
 
@@ -941,7 +945,7 @@ bool MBTL_Character::do_sprite_save(int id, const char *filename) {
 	return retval;
 }
 
-bool MBTL_Character::save_current_sprite(const char *filename, int seq_id, int fr_id) {
+bool MBTL_Character::save_current_sprite(const char *filename, int seq_id, int fr_id, RenderProperties* properties) {
 	if (!m_loaded) {
 		return 0;
 	}
@@ -968,7 +972,7 @@ bool MBTL_Character::save_current_sprite(const char *filename, int seq_id, int f
       }
 
       //fprintf( fp2, "AAAAAAA %d %d %d", nzsid, seq_id, fr_id  );
-      return do_sprite_save(nzsid, filename);
+      return do_sprite_save(nzsid, filename, properties, frame);
 	}
 
   //fclose( fp2 );
