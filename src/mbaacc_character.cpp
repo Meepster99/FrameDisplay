@@ -9,6 +9,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cstdarg>
+
 static void copy_hitbox_to_rect(rect_t *rect, MBAACC_Hitbox *hitbox) {
 	rect->x1 = (hitbox->x1)*2;
 	rect->y1 = (hitbox->y1)*2;
@@ -639,15 +641,28 @@ const char *MBAACC_Character::get_current_sprite_filename(int seq_id, int fr_id)
 
 bool MBAACC_Character::do_sprite_save(int id, const char *filename, RenderProperties* properties, int seq_id, int fr_id) {
 	Texture *texture;
+
+	/*
+	int duration = -1;
+	MBAACC_Frame *frame = get_frame(seq_id, fr_id); // is it possible that not doing the below check will cause an issue
+	if(frame) {
+		duration = frame->AF.duration;
+	}
+	*/
 	
-  if (properties->use_view_options && seq_id >= 0 && fr_id >= 0) {
-      MBAACC_Frame *frame = get_frame(seq_id, fr_id);
-      texture = m_cg.draw_texture_with_boxes(id, m_palettes[m_active_palette], 1, properties, frame);
-  } else {
-      texture = m_cg.draw_texture(id, m_palettes[m_active_palette], 1, 1);
-  }
+	if (properties->use_view_options && seq_id >= 0 && fr_id >= 0) {
+		MBAACC_Frame *frame = get_frame(seq_id, fr_id);
+		texture = m_cg.draw_texture_with_boxes(id, m_palettes[m_active_palette], 1, properties, frame);
+	} else {
+		texture = m_cg.draw_texture(id, m_palettes[m_active_palette], 1, 1);
+	}
+
 	bool retval = 0;
-	
+
+	//char tempFilenameBuffer[1024];
+	//snprintf(tempFilenameBuffer, 1024, "%s.%d_%d_%d", filename, seq_id, fr_id, duration);
+	//snprintf(tempFilenameBuffer, 1024, "%d_%d_%d.png", seq_id, fr_id, duration);
+
 	if (texture) {
 		retval = texture->save_to_png(filename, m_palettes[m_active_palette]);
 		
@@ -669,10 +684,22 @@ bool MBAACC_Character::save_current_sprite(const char *filename, int seq_id, int
 	}
 
 	if (frame->AF.active && frame->AF.frame >= 0) {
-    return do_sprite_save(frame->AF.frame, filename, properties, seq_id, fr_id);
+		return do_sprite_save(frame->AF.frame, filename, properties, seq_id, fr_id);
 	}
 	
 	return 0;
+}
+
+void __stdcall log(const char* format, ...) {
+	char buffer[1024];
+	va_list args;
+	va_start(args, format);
+	vsnprintf(buffer, 1024, format, args);	
+	va_end(args);
+
+	FILE* file = fopen("temp.log", "a");
+	fprintf(file, "%s\n", buffer); 
+	fclose(file);
 }
 
 int MBAACC_Character::save_all_character_sprites(const char *directory, RenderProperties* properties) {
@@ -680,6 +707,39 @@ int MBAACC_Character::save_all_character_sprites(const char *directory, RenderPr
 		return 0;
 	}
 	
+	int count = 0;
+
+
+	char buffer[1024];
+
+	// make this a for loop like the above save_current]
+	for(int seq=0; seq < get_sequence_count(); seq++) {
+		if(has_sequence(seq)) {
+			log("seq: %5d", seq);
+			for(int fr=0; fr < get_frame_count(seq); fr++) {
+
+				MBAACC_Frame *frame = get_frame(seq, fr);
+
+				if (!frame) {
+					log("\tframe was null");
+					continue;
+				}
+
+				int duration = frame->AF.duration;
+
+				snprintf(buffer, 1024, "%s%d_%d_%d.png", directory, seq, fr, duration);
+
+				log(buffer);
+
+				//if (frame->AF.active && frame->AF.frame >= 0) { // unsure if i wasnt this conditional
+				count += do_sprite_save(frame->AF.frame, buffer, properties, seq, fr) ? 1 : 0;
+			}
+		}
+	}
+
+	return count;
+
+	/*
 	int n = m_cg.get_image_count();
 	int count = 0;
 	
@@ -698,12 +758,17 @@ int MBAACC_Character::save_all_character_sprites(const char *directory, RenderPr
 			} else {
 				strcat(filename, ".png");
 			}
-			
-			count += do_sprite_save(i, filename, properties) ? 1 : 0;
+
+			if (frame->AF.active && frame->AF.frame >= 0) {
+				count += do_sprite_save(frame->AF.frame, filename, properties, seq_id, fr_id) ? 1 : 0;
+			} else {
+				count += do_sprite_save(i, filename, properties) ? 1 : 0;
+			}
 		}
 	}
-	
+
 	return count;
+	*/
 }
 
 void MBAACC_Character::free_frame_data() {

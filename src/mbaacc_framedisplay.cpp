@@ -476,7 +476,8 @@ int MBAACC_FrameDisplay::save_all_character_sprites(const char *directory, Rende
 	if (!m_initialized) {
 		return 0;
 	}
-	
+
+
 	return m_character_data.save_all_character_sprites(directory, properties);
 }
 

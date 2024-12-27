@@ -1552,6 +1552,7 @@ static void init_menu() {
 	AppendMenu(hMenu, MF_STRING, IDM_MISC_SAVE_SPRITE, "Save this sprite...");
 	AppendMenu(hMenu, MF_STRING, IDM_MISC_SAVE_ALL_SPRITES, "Save all this character's sprites...");
 	AppendMenu(hMenu, MF_STRING | MF_CHECKED, IDM_USE_VIEW_OPTIONS, "Save sprites with boxes");
+	//AppendMenu(hMenu, MF_STRING | MF_CHECKED, IDM_USE_VIEW_OPTIONS, "Save sprites with duration for gifs?");
 	
 	hMenuMisc = hMenu;
 	
